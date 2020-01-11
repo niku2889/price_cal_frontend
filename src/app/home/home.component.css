@@ -1,0 +1,23 @@
+:host ::ng-deep .ui-widget {
+    font-size: 12px!important;
+}
+
+:host ::ng-deep .ui-widget label {
+    font-weight: bold!important;
+}
+
+.form-control {
+    font-size: 12px;
+}
+
+.f-12{
+    font-size: 12px;
+}
+
+.h-30{
+    height: 30px;
+}
+
+:host ::ng-deep select.form-control:not([size]):not([multiple]) {
+    height: auto;
+}

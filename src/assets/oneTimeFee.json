@@ -1,0 +1,225 @@
+{
+    "communicationServices": [
+        {
+            "id": 1,
+            "item": "Protocol",
+            "oneTimeDeliverable": "",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 2,
+            "item": "Software",
+            "oneTimeDeliverable": "",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        }
+    ],
+    "integrationServices": [
+        {
+            "id": 1,
+            "item": "",
+            "oneTimeDeliverable": "",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 2,
+            "item": "Secondary Adapter",
+            "oneTimeDeliverable": "",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        }
+    ],
+    "tpAndDocumentActivation": [
+        {
+            "id": 1,
+            "item": "TP and Documents",
+            "oneTimeDeliverable": "",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        }
+    ],
+    "administrativeAndManagementServices": [
+        {
+            "id": 1,
+            "item": "DiPulse Master",
+            "oneTimeDeliverable": "Includes connection to DiWeb",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 2,
+            "item": "Dimetrics",
+            "oneTimeDeliverable": "Dimetrics Setup",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        }
+    ],
+    "communityManagement": [
+        {
+            "id": 1,
+            "item": "",
+            "oneTimeDeliverable": "Trading Partners to be enabled",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 2,
+            "item": "",
+            "oneTimeDeliverable": "Trading Partner EDI Implementation Guide Creation",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 3,
+            "item": "",
+            "oneTimeDeliverable": "Set up Compliance Test Site",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 4,
+            "item": "",
+            "oneTimeDeliverable": "Compliance Testing per Document",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 5,
+            "item": "",
+            "oneTimeDeliverable": "Create Labels",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 6,
+            "item": "Setup",
+            "oneTimeDeliverable": "Sponsor Paid Portal",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 7,
+            "item": "Trading Partner Fees",
+            "oneTimeDeliverable": "Sponsor Paid Portal",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        }
+    ],
+    "projectManagement": [
+        {
+            "id": 1,
+            "item": "",
+            "oneTimeDeliverable": "Project Management",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        }
+    ],
+    "other": [
+        {
+            "id": 1,
+            "item": "",
+            "oneTimeDeliverable": "DiCentral hours",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 2,
+            "item": "Setup",
+            "oneTimeDeliverable": "Service Bureau 1st Document Build",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 3,
+            "item": "Setup Additional Doc",
+            "oneTimeDeliverable": "Service Bureau Documents",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        },
+        {
+            "id": 4,
+            "item": "Non-EDI TP Integration",
+            "oneTimeDeliverable": "",
+            "erp": "",
+            "unitPrice": 0,
+            "quantity": 0,
+            "price": 0,
+            "discount": 0,
+            "afterDiscountPrice": 0
+        }
+    ]
+}

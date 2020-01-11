@@ -1,0 +1,356 @@
+<p-toast [style]="{marginTop: '120px'}"></p-toast>
+<div class="container">
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5>Report Management</h5>
+        </div>
+        <div class="card-body">
+            <p-table #dt [columns]="cols" [value]="reportData" [paginator]="true" [rows]="15">
+                <ng-template pTemplate="caption">
+                    <div style="text-align: right">
+                        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
+                        <input type="text" pInputText size="50" placeholder="Global Filter"
+                            (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto">
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th *ngFor="let col of columns" [pSortableColumn]="col.field">
+                            {{col.header}}
+                            <p-sortIcon [field]="col.field"></p-sortIcon>
+                        </th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-columns="columns">
+                    <tr>
+                        <td *ngFor="let col of columns">
+                            {{rowData[col.field]}}
+                        </td>
+                        <td>
+                            <a style="cursor: pointer;" (click)="generateReport(rowData['Id'],rowData)">
+                                <mat-icon>assignment</mat-icon>
+                            </a>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+        </div>
+    </div>
+    <p-dialog header="Report Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
+        showEffect="fade" [modal]="true" [style]="{width: '800px'}" [autoZIndex]="false">
+        <div class="pb-3 pr-5 pt-2">
+            <button (click)="downloadReport()" class="btn btn-success float-right btn-sm"><i
+                    class="fa fa-download mr-2"></i>Download Pricing Table</button>
+        </div>
+        <div class="p-5">
+            <h4><i class="fa fa-calculator"></i> Final Price Calculation Report <span class="float-right">Date :
+                    {{todayDate | date:'short'}}</span></h4>
+            <hr>
+            <div>
+                <table id="finalReportId" class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>One Time Deliverable</th>
+                            <th>ERP</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th style="width:17%">Discount(%)</th>
+                            <th>After Discount Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-light">
+                            <td colspan="8" class="font-weight-bold text-center">One Time Fee
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(1)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Communication Services
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(1)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(1)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(oneTimeFeeData?.communicationServices) | currency:currency}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(2)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Integration Services
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(2)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(2)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td style="font-weight: bold;color:red;">
+                                {{ 0 + getSum(oneTimeFeeData?.integrationServices) | currency:currency}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(3)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Trading Partner and
+                                Document Activation
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(3)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(3)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(oneTimeFeeData?.tpAndDocumentActivation) | currency:currency}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(4)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Administrative and
+                                Management Services
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(4)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(4)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(oneTimeFeeData?.administrativeAndManagementServices) | currency:currency}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(5)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Community Management
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(5)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(5)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(oneTimeFeeData?.communityManagement) | currency:currency}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(6)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Project Management
+                            </td>
+                        </tr>
+
+                        <tr *ngFor="let item of finalReportData(6)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(6)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(oneTimeFeeData?.projectManagement) | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(7)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Other
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(7)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(7)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(oneTimeFeeData?.other) | currency:currency}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="8">
+                            </td>
+                        </tr>
+                        <tr class="bg-light">
+                            <td colspan="8" class="font-weight-bold text-center">Recurring Fee
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(8)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Monthly Support Service
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(8)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(8)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(recurringFeeData?.monthlySupportService) | currency:currency}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(9)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Volume Plan
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(9)" class="bg-light">
+                            <td colspan="3"></td>
+                            <td class="font-weight-bold">MAX Orders</td>
+                            <td class="font-weight-bold">Rate</td>
+                            <td class="font-weight-bold">Fixed Monthly</td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(9)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(9)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(recurringFeeData?.volumePlan) | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(10)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Service Bureau
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(10)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(10)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(recurringFeeData?.serviceBureau) | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(11)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">NON EDI Formatted Fees
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(11)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(11)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(recurringFeeData?.nonEdiFormattedFees) | currency:currency}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="showHideRow(12)" class="bg-light">
+                            <td colspan="8" class="font-weight-bold">Other
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of finalReportData(12)">
+                            <td>{{item.Item}}</td>
+                            <td>{{item.OneTimeDeliverable}}</td>
+                            <td>{{item.Erp}}</td>
+                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Price | currency:currency}}</td>
+                            <td>{{item.Discount}}%</td>
+                            <td>{{item.AfterDiscountPrice | currency:currency}}</td>
+                        </tr>
+                        <tr *ngIf="showHideRow(12)">
+                            <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getSum(recurringFeeData?.other) | currency:currency}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="7" class="font-weight-bold text-right">Total Of One Time Fees:</td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getTotalOneTimeFee(oneTimeFeeData) | currency:currency}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" class="font-weight-bold text-right">Total Of Recurring Fees:
+                            </td>
+                            <td class="font-weight-bold text-danger">
+                                {{ 0 + getTotalRecurringFee(recurringFeeData) | currency:currency}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" class="font-weight-bold text-right">Contract period to calculate
+                                the TCV in months:
+                            </td>
+                            <td class="font-weight-bold text-danger">
+                                {{contractMonths}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" class="font-weight-bold text-right">Total Contract Value (TCV):
+                            </td>
+                            <td class="font-weight-bold text-danger">
+                                {{totalContractValue | currency:currency}}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </p-dialog>
+</div>

@@ -1,0 +1,1342 @@
+<nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="#">
+        <i class="fa fa-calculator"></i> PRICING CALCULATOR
+    </a>
+    <div class="form-inline">
+        <a class="nav-link">
+            <i class="fa fa-user"></i> {{name}}
+        </a>
+    </div>
+</nav>
+
+<div class="m-3">
+    <p-toast position="top-right"></p-toast>
+    <div class="row">
+        <div [class.col-md-12]="isTab3" [class.col-md-9]="!isTab3   ">
+            <p-tabView (onChange)="handleChange($event)">
+                <p-tabPanel header="Managed Services Input" [selected]="isTab1" [disabled]="!isTab1">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Select an ERP</label>
+                                <select [(ngModel)]="selectedErp" (ngModelChange)="changeErp($event)"
+                                    class="form-control col-md-8 p-1">
+                                    <option *ngFor="let item of erpData" value="{{item.Name}}">{{item.Name}} -
+                                        {{item.Size}}</option>
+                                </select>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">MS / E-Commerce</label>
+                                <div class="col-md-8 p-1">
+                                    <mat-radio-group [(ngModel)]="msEcommerece">
+                                        <mat-radio-button class="pr-2" value="MS" [checked]="isMs">MS
+                                        </mat-radio-button>
+                                        <mat-radio-button class="pr-2" value="E-Commerce">E-Commerce
+                                        </mat-radio-button>
+                                        <mat-radio-button value="Both">Both</mat-radio-button>
+                                    </mat-radio-group>
+                                </div>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Buy Side / Sell Side</label>
+                                <div class="col-md-8 p-1">
+                                    <mat-checkbox [(ngModel)]="buySideCheck" class="pr-2" (change)="buySide($event)">
+                                        Buy Side
+                                    </mat-checkbox>
+                                    <mat-checkbox [(ngModel)]="sellSideCheck" (change)="sellSide($event)" class="pr-2">
+                                        Sell Side</mat-checkbox>
+                                </div>
+                                <div *ngIf="buySideCheck" class="border border-primary col-md-12 mt-3 ">
+                                    <h6 class="bg-info font-weight-bold text-white text-center">BUY SIDE</h6>
+                                    <div class="row p-1">
+                                        <label class="col-md-8">Need to Create EDI Specifications Booklet for
+                                            TP's</label>
+                                        <mat-checkbox [(ngModel)]="buySideCreateEdiSpecForBookletTp" class="col-md-4"
+                                            (change)="createEdiSpecBooklet($event)">
+                                        </mat-checkbox>
+                                    </div>
+                                    <div class="row p-1">
+                                        <label class="col-md-8">Need to implement a Compliance test program</label>
+                                        <mat-checkbox [(ngModel)]="buySideImplementComplianceTestProgram"
+                                            class="col-md-4" (change)="complianceTest($event)">
+                                        </mat-checkbox>
+                                    </div>
+                                    <div *ngIf="isCompliance">
+                                        <div class="row pl-4 p-1">
+                                            <label class="col-md-8">Choose Who pays for it</label>
+                                            <select [(ngModel)]="complianceTestWhoPays"
+                                                (ngModelChange)="changeComplianceTestWhoPays($event)"
+                                                class="form-control col-md-4">
+                                                <option value="Trading Partner (Paid)">Trading Partner (Paid)
+                                                </option>
+                                                <option value="Project Sponsor (Paid)">Project Sponsor (Paid)
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="row pl-4 p-1">
+                                            <label class="col-md-8">No of Trading Partnerrs to be compliance
+                                                tested</label>
+                                            <input [(ngModel)]="noTPComplienceTested"
+                                                (keyup)="changeNoTPComplienceTested($event)" type="number" min="0"
+                                                class="form-control col-md-4">
+                                        </div>
+                                    </div>
+                                    <div class="row p-1">
+                                        <label class="col-md-8">Need to provide labels</label>
+                                        <mat-checkbox [(ngModel)]="provideLabel" class="col-md-4"
+                                            (change)="provideLabels($event)">
+                                        </mat-checkbox>
+                                    </div>
+                                    <div *ngIf="isProvideLabel" class="row pl-4 p-1">
+                                        <label class="col-md-8">No. of retailer divisions needing labels</label>
+                                        <input (keyup)="lablesChange($event)" [(ngModel)]="noRetailerDivisionLabels"
+                                            type="number" min="0" class="form-control col-md-4">
+                                    </div>
+                                    <div class="row p-1">
+                                        <label class="col-md-8">Is the HUB paying for suppliers?</label>
+                                        <mat-checkbox [(ngModel)]="hubPayingForSupplier" class="col-md-4"
+                                            (change)="hubPaying($event)">
+                                        </mat-checkbox>
+                                    </div>
+                                    <div *ngIf="isHubPaying">
+                                        <div class="row pl-4 p-1">
+                                            <label class="col-md-8">Is this a private Portal?</label>
+                                            <mat-checkbox [(ngModel)]="isPrivatePortal" class="col-md-4 pl-2"
+                                                (change)="privatePortal($event)">
+                                            </mat-checkbox>
+                                        </div>
+                                        <div class="row pl-4 p-1">
+                                            <label class="col-md-8">No. of Trading partners using the Portal</label>
+                                            <input (keyup)="tpPortalChange($event)" [(ngModel)]="noTPusingPortal"
+                                                type="number" min="0" class="form-control col-md-4">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Number of Documents on Scope</label>
+                                <div class="col-md-8 p-1">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="row pl-2">
+                                                <label class="col-md-3 p-1">EDI</label>
+                                                <input [(ngModel)]="noEdiDocs" type="number"
+                                                    class="form-control col-md-9 p-1" (keyup)="ediChange($event)"
+                                                    min="0">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-6">
+                                            <div class="row">
+                                                <label class="col-md-5 p-1">NON-EDI</label>
+                                                <input [(ngModel)]="noNonEdiDocs" type="number"
+                                                    class="form-control col-md-6 p-1" (keyup)="nonEdiChange($event)"
+                                                    min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div *ngIf="isEDI"
+                                    class="border border-primary col-md-12 mt-3 text-center table-responsive">
+                                    <h6 class="bg-info font-weight-bold text-white">EDI TP's on Scope</h6>
+                                    <table class="table table-bordered table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Select EDI Documents in Scope</th>
+                                                <th>No. of TP's Corresponding to EDI Docs</th>
+                                                <th>Integrated to ERP / DiPulse</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let i of ediLoop">
+                                                <td>
+                                                    <select class="form-control" [(ngModel)]="i.ediDocs">
+                                                        <option *ngFor="let item of ediData" value="{{item.Id}}">
+                                                            {{item.EdiDocs}}</option>
+                                                    </select>
+                                                </td>
+                                                <td><input [(ngModel)]="i.noOfTP" class="form-control" type="number"
+                                                        (keyup)="changeEdiTP($event)" placeholder="Enter Number Here"
+                                                        value="0" min="0">
+                                                </td>
+                                                <td>
+                                                    <select class="form-control" [(ngModel)]="i.integratedERPDiPulse" (ngModelChange)="ediDocsSelectChange($event)">
+                                                        <option value=""></option>
+                                                        <option>Only be used in DiPulse</option>
+                                                        <option>Outbound from Trading Partner</option>
+                                                        <option>Inbound from Trading Partner</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div *ngIf="isNonEDI"
+                                    class="border border-primary col-md-12 mt-3 text-center table-responsive">
+                                    <h6 class="bg-info font-weight-bold text-white">NON-EDI TP's</h6>
+                                    <table class="table table-bordered table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Select documents in scope used by NON EDI TP's</th>
+                                                <th>Number of NON-EDI TP's under each document</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let i of nonEdiLoop">
+                                                <td>
+                                                    <select [(ngModel)]="i.nonEdiDocs" class="form-control">
+                                                        <option *ngFor="let item of ediData" value="{{item.Id}}">
+                                                            {{item.EdiDocs}}</option>
+                                                    </select>
+                                                </td>
+                                                <td><input (keyup)="changeNonEdiTP($event)" [(ngModel)]="i.noOfNonEdiTP"
+                                                        class="form-control" type="number"
+                                                        placeholder="Enter Number Here" value="0" min="0">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Choose min no. of KB</label>
+                                <div class="col-md-8 p-1">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <mat-radio-group [(ngModel)]="selectedKBPlan" (change)="plans($event)">
+                                                <mat-radio-button class="pr-2" value="MS KB Plan">MS
+                                                    KB Plan
+                                                </mat-radio-button>
+                                                <mat-radio-button value="Drop Ship Volume Plan">Drop
+                                                    Ship Volume Plan
+                                                </mat-radio-button>
+                                            </mat-radio-group>
+                                        </div>
+                                        <div *ngIf="isMsKbPlan" class="col-md-12">
+                                            <select class="form-control" [(ngModel)]="selectedMSKBPlan"
+                                                (ngModelChange)="dsvpChange($event)">
+                                                <option *ngFor="let item of msKbPlansData" value="{{item.Id}}">
+                                                    {{item.Plans}}</option>
+                                            </select>
+                                        </div>
+                                        <div *ngIf="isDropShipVolumePlan" class="col-md-12">
+                                            <select class="form-control" [(ngModel)]="selectedDropShipVolumePlan"
+                                                (ngModelChange)="dsvpChange($event)">
+                                                <option *ngFor="let item of dropShipVolumePlanData" value="{{item.Id}}">
+                                                    {{item.Plans}}</option>
+                                            </select>
+                                        </div>
+                                        <div *ngIf="isAdditionalPlanDetails" class=" col-md-12 mt-3 ">
+                                            <div class="border border-primary">
+                                                <h6 class="bg-info font-weight-bold text-white text-center">
+                                                    Additional
+                                                    Plan details</h6>
+                                                <div class="p-1">
+                                                    <select class="form-control col-md-12"
+                                                        (ngModelChange)="changeServicePlan($event)"
+                                                        [(ngModel)]="dsvpSelectedServicePlan">
+                                                        <option value="">-- Choose Service Plan offered --</option>
+                                                        <option value="Standard">Standard</option>
+                                                        <option value="Advanced">Advanced </option>
+                                                        <option value="Premium">Premium </option>
+                                                    </select>
+                                                </div>
+                                                <div class="row p-1">
+                                                    <div class="col-md-12">
+                                                        <mat-radio-group [(ngModel)]="dsvpSelectedProgram"
+                                                            (change)="dsvpChange($event)">
+                                                            <mat-radio-button class="pr-2"
+                                                                value="Standard Replenishment">
+                                                                Standard
+                                                                Replenishment
+                                                            </mat-radio-button>
+                                                            <mat-radio-button value="Drop Ship Program">Drop Ship
+                                                                Program
+                                                            </mat-radio-button>
+                                                        </mat-radio-group>
+                                                    </div>
+                                                </div>
+                                                <div class="row p-1">
+                                                    <div class="col-md-12">
+                                                        <mat-radio-group [(ngModel)]="dsvpSelectedPlan"
+                                                            (change)="dsvpChange($event)">
+                                                            <mat-radio-button class="pr-2" value="Annual Plan">
+                                                                Annual
+                                                                Plan
+                                                            </mat-radio-button>
+                                                            <mat-radio-button value="Monthly Plan">Monthly Plan
+                                                            </mat-radio-button>
+                                                        </mat-radio-group>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Choose Primary integration Methodology?</label>
+                                <select class="form-control col-md-8 p-1" [(ngModel)]="selectedPrimaryIntegrationMethod"
+                                    name="primaryMethod" (ngModelChange)="changePrimaryMethod($event)">
+                                    <option value="Flat File">Flat File Integration</option>
+                                    <option value="Embedded Adapter">Embedded Adapter</option>
+                                    <option value="Web Services">Web Services</option>
+                                    <option value="DiIntegrator">DiIntegrator</option>
+                                </select>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">More than one integration Methodology? </label>
+                                <div class="col-md-8 p-1">
+                                    <mat-checkbox [(ngModel)]="moreIntegrationMethodology"
+                                        (change)="integrationMethodology($event)">
+                                    </mat-checkbox>
+                                    <div *ngIf="isIntegrationMethodology" class="border border-primary mt-3 ">
+                                        <h6 class="bg-info font-weight-bold text-white text-center">Choose Secondary
+                                        </h6>
+                                        <div class="p-1">
+                                            <select class="form-control col-md-12"
+                                                [(ngModel)]="selectedSecondaryIntegrationMethod" name="secondoryMethod"
+                                                (ngModelChange)="changeSecondaryMethod($event)">
+                                                <option value="Flat File">Flat File Integration</option>
+                                                <option value="Embedded Adapter">Embedded Adapter</option>
+                                                <option value="Web Services">Web Services</option>
+                                                <option value="DiIntegrator">DiIntegrator</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Are all TP's using only EDI Standards? </label>
+                                <div class="col-md-8 p-1">
+                                    <mat-checkbox [(ngModel)]="tpUsingOnlyEdiStandards"
+                                        (change)="tpUsingEdiStandards($event)">
+                                    </mat-checkbox>
+                                    <div *ngIf="isTpUsingEdiStandards" class="border border-primary mt-3 ">
+                                        <h6 class="bg-info font-weight-bold text-white text-center">No. of
+                                            electronically
+                                            integrated NON EDI TP
+                                        </h6>
+                                        <div class="p-1">
+                                            <input [(ngModel)]="noElectronicallyIntegratedNonEdiTp"
+                                                (keyup)="noElectronicallyIntegratedNonEdiTpChange($event)" type="number"
+                                                class="form-control" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row mb-2 m-0 ">
+                                <div class="col-md-12 p-0 table-responsive">
+                                    <table *ngIf="isEcommerceTable" class="table table-bordered table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Select the E-Commerce Sites</th>
+                                                <th class="text-center">Orders</th>
+                                                <th class="text-center">Product</th>
+                                                <th class="text-center">Fullfilment</th>
+                                                <th class="text-center">Inventory</th>
+                                                <th class="text-center">Payment</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let i of ecommerceData">
+                                                <td class="text-primary">{{i.name}}</td>
+                                                <td class="text-center">
+                                                    <mat-checkbox [(ngModel)]="i.orders"
+                                                        (change)="changeEcomCheck($event)" [checked]="i.orders">
+                                                    </mat-checkbox>
+                                                </td>
+                                                <td class="text-center">
+                                                    <mat-checkbox [(ngModel)]="i.product"
+                                                        (change)="changeEcomCheck($event)" [checked]="i.product">
+                                                    </mat-checkbox>
+                                                </td>
+                                                <td class="text-center">
+                                                    <mat-checkbox [(ngModel)]="i.fullfilment"
+                                                        (change)="changeEcomCheck($event)" [checked]="i.fullfilment">
+                                                    </mat-checkbox>
+                                                </td>
+                                                <td class="text-center">
+                                                    <mat-checkbox [(ngModel)]="i.inventory"
+                                                        (change)="changeEcomCheck($event)" [checked]="i.inventory">
+                                                    </mat-checkbox>
+                                                </td>
+                                                <td class="text-center">
+                                                    <mat-checkbox [(ngModel)]="i.payment"
+                                                        (change)="changeEcomCheck($event)" [checked]="i.payment">
+                                                    </mat-checkbox>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <div class="col-md-12 p-1">
+                                    <div class="form-check form-check-inline font-weight-bold">
+                                        Does the client need Addiitonal
+                                        Services (Dimetrics, Service Bureau, DiPulse, Communication software etc.)
+                                        <mat-checkbox class="ml-3 mt-2" [(ngModel)]="isClientNeedAdditionalSerices"
+                                            (change)="additionalService($event)">
+                                        </mat-checkbox>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-info" (click)="clearManagedServiceInputes()">Clear</button>
+                            <button *ngIf="!isClientNeedAdditionalSerices" class="btn btn-sm btn-info float-right"
+                                (click)="hideShowTab(3)">Skip - Finish
+                                Pricing</button>
+                            <button *ngIf="isClientNeedAdditionalSerices" class="btn btn-sm btn-info float-right"
+                                (click)="hideShowTab(2)">Next - Additional Service Input</button>
+                        </div>
+                    </div>
+                </p-tabPanel>
+                <p-tabPanel *ngIf="isAdditionalService" header="Additional Services Input" [disabled]="!isTab2"
+                    [selected]="isTab2">
+                    <div class="alert alert-info">
+                        Choose if you would like to have the following additional services
+                    </div>
+                    <div class="row mb-2 m-0">
+                        <div class="col-md-12 p-1">
+                            <div class="form-check form-check-inline">
+                                <mat-checkbox class="mr-1 mt-2" (change)="addServices($event,1)" [(ngModel)]="diPulse">
+                                </mat-checkbox>DiPulse
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <mat-checkbox class="mr-1 mt-2" (change)="addServices($event,2)"
+                                    [(ngModel)]="diMetrics">
+                                </mat-checkbox> DiMetrics
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <mat-checkbox class="mr-1 mt-2" (change)="addServices($event,3)"
+                                    [(ngModel)]="serviceBureau">
+                                </mat-checkbox>Service Bureau
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <mat-checkbox class="mr-1 mt-2" (change)="addServices($event,4)"
+                                    [(ngModel)]="communicationSoftware">
+                                </mat-checkbox>Communication Software
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <mat-checkbox class="mr-1 mt-2" (change)="addServices($event,5)"
+                                    [(ngModel)]="onsiteProfessionalServices">
+                                </mat-checkbox>Onsite Professional Services
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="isAdditionalTab" class="border mb-2">
+                        <p-tabView>
+                            <p-tabPanel header="DiPulse" *ngIf="!additionServiceTab1">
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1">No. of Additional DiPulse id's needed beyond Master's ID</p>
+                                    <input [(ngModel)]="noDiPulseIdNeeded" type="number"
+                                        class="form-control col-md-6 p-1" (keyup)="noDiPulseIdNeededChange($event)"
+                                        min="0">
+                                </div>
+                            </p-tabPanel>
+                            <p-tabPanel header="DiMetrics" *ngIf="!additionServiceTab2">
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1">Enter the number of Business Rules</p>
+                                    <input [(ngModel)]="noBusinessRules" (keyup)="noBusinessRulesChange($event)"
+                                        type="number" class="form-control col-2 p-1" min="0">
+                                </div>
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1">Number of Documents used in Business Rules</p>
+                                    <input [(ngModel)]="noDocUsedInBusinessRules"
+                                        (keyup)="noDocUsedInBusinessRulesChange($event)" type="number"
+                                        class="form-control col-2 p-1" min="0">
+                                </div>
+                                <div class="row mb-2 m-0 p-1">
+                                    <div class="form-check form-check-inline">
+                                        Should DiMetrics host any customer files administered by customer
+                                        <mat-checkbox class="ml-1 mt-2" (change)="isDiMetricsHostChange($event)"
+                                            [(ngModel)]="isDiMetricsHost">
+                                        </mat-checkbox>
+                                    </div>
+                                </div>
+                                <div *ngIf="isDiMetricsHost" class="row mb-2 m-0">
+                                    <p class="p-1">No. of KB associated will they be hosting each month</p>
+                                    <input [(ngModel)]="noKBHostedEachMonth" (keyup)="noKBHostedEachMonthChange($event)"
+                                        type="number" class="form-control col-md-2 p-1" min="0">
+                                </div>
+                            </p-tabPanel>
+                            <p-tabPanel header="Service Bureau" *ngIf="!additionServiceTab3">
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1">How many documents will service bureau users be implementing?</p>
+                                    <input [(ngModel)]="noDocServiceBureauUsers"
+                                        (keyup)="noDocServiceBureauUsersChange($event)" type="number"
+                                        class="form-control col-md-2 p-1" min="0">
+                                </div>
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1">Will Sponsor be paying for the Service Bureau Users?</p>
+                                    <select [(ngModel)]="sponsorPayingServiceBureauUsers"
+                                        (ngModelChange)="sponsorPayingServiceBureauUsersChange($event)"
+                                        class="form-control col-md-2 p-1">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+                                <div *ngIf="sponsorPayingServiceBureauUsers == 'Yes'">
+                                    <div class="row mb-2 m-0 ml-4">
+                                        <p class="p-1 col-md-4">How many service bureau users will be there in this
+                                            project?
+                                        </p>
+                                        <input [(ngModel)]="serviceBureauUsersInProject"
+                                            (keyup)="serviceBureauUsersInProjectChange($event)" type="number"
+                                            class="form-control col-md-2 p-1" min="0">
+                                    </div>
+                                    <div class="row mb-2 m-0 ml-4">
+                                        <p class="p-1 col-md-4">How many documents (850, 855, 865, 810) per month?</p>
+                                        <input [(ngModel)]="docsPerMonth" (keyup)="docsPerMonthChange($event)"
+                                            type="number" class="form-control col-md-2 p-1" min="0">
+                                    </div>
+                                    <div class="row mb-2 m-0 ml-4">
+                                        <p class="p-1 col-md-4">How many Documents (856) per month?</p>
+                                        <input [(ngModel)]="docs856PerMonth" (keyup)="docs856PerMonthChange($event)"
+                                            type="number" class="form-control col-md-2 p-1" min="0">
+                                    </div>
+                                    <div class="row mb-2 m-0 ml-4">
+                                        <p class="p-1 col-md-4">Monthly Line Items for all Users</p>
+                                        <input [(ngModel)]="lineItemsPerMonth" (keyup)="lineItemsPerMonthChange($event)"
+                                            type="number" class="form-control col-md-2 p-1">
+                                    </div>
+                                    <div class="row mb-2 m-0 ml-4">
+                                        <p class="p-1 col-md-4">Labels are the Service Bureau users planning per month?
+                                        </p>
+                                        <input [(ngModel)]="labelsServiceBureauUsersPerMonth"
+                                            (keyup)="labelsServiceBureauUsersPerMonthChange($event)" type="number"
+                                            class="form-control col-md-2 p-1" min="0">
+                                    </div>
+
+                                </div>
+                            </p-tabPanel>
+                            <p-tabPanel header="Communication Software" *ngIf="!additionServiceTab4">
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1 col-md-6">Identify the SW to be used for Integration</p>
+                                    <span *ngIf="additionServiceTab4" class="col-md-6 p-1">{{identifyTheSwNo}}</span>
+                                    <select *ngIf="!additionServiceTab4" [(ngModel)]="identifyTheSwYes"
+                                        class="form-control col-md-6 p-1"
+                                        (ngModelChange)="identifyTheSwYesChange($event)">
+                                        <option value="DiIntegrator">DiIntegrator</option>
+                                        <option value="DiConnect Enterprice">DiConnect Enterprice</option>
+                                        <option value="DiConnect Lite">DiConnect Lite</option>
+                                    </select>
+                                </div>
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1 col-md-6">Protocol that Client uses to connect to DICentral</p>
+                                    <select [(ngModel)]="protocolConnectToDicenter" class="form-control col-md-6 p-1"
+                                        (ngModelChange)="protocolConnectToDicenterChange($event)">
+                                        <option value="AS2">AS2</option>
+                                        <option value="FTP">FTP</option>
+                                        <option value="SFTP">SFTP</option>
+                                        <option value="FTP/s">FTP/s</option>
+                                        <option value="Web Services">Web Services</option>
+                                    </select>
+                                </div>
+                            </p-tabPanel>
+                            <p-tabPanel header="Onsite Professional Services" *ngIf="!additionServiceTab5">
+                                <div class="row mb-2 m-0">
+                                    <p class="p-1 ">How many hours are needed on the site?</p>
+                                    <input [(ngModel)]="howManyHoursNeeded" (keyup)="howManyHoursNeededChange($event)"
+                                        type="number" class="form-control col-2 p-1" min="0">
+                                </div>
+                            </p-tabPanel>
+                        </p-tabView>
+                    </div>
+                    <button class="btn btn-sm btn-info" (click)="hideShowTab(1)"> Back - Managed Services Input
+                    </button>
+                    <button class="btn btn-sm btn-info float-right" (click)="hideShowTab(3)">Next - Finish
+                        Pricing</button>
+                </p-tabPanel>
+                <p-tabPanel header="Pricing" [selected]="isTab3" [disabled]="!isTab3">
+                    <div class="row mb-2 text-center">
+                        <div class="col-md-3">
+                            <button [class.active]="isOneTimeFee" class="btn btn-outline-info btn-sm"
+                                (click)="getFee(1)">One Time Fees</button><br>
+                            <div class="input-group m-auto pt-3 w-50">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{{currency}}</span>
+                                </div>
+                                <input value="{{ 0 + getTotalOneTimeFee(oneTimeFeeData)}}" type="number"
+                                    class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button [class.active]="isRecurringFee" class="btn btn-outline-info btn-sm"
+                                (click)="getFee(2)">Recurring Fees</button>
+                            <div class="input-group m-auto pt-3 w-50">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{{currency}}</span>
+                                </div>
+                                <input value="{{ 0 + getTotalRecurringFee(recurringFeeData)}}" type="number"
+                                    class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h5> Contract Period</h5>
+                            <div class="input-group m-auto pt-3 w-50">
+                                <input [(ngModel)]="contractMonths" value="0" type="number" class="form-control">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Months</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Total Contract Value (TCV)</h5>
+                            <div class="input-group m-auto pt-3 w-50">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{{currency}}</span>
+                                </div>
+                                <input
+                                    value="{{(contractMonths * getTotalRecurringFee(recurringFeeData)) + getTotalOneTimeFee(oneTimeFeeData) }}"
+                                    type="number" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="isOneTimeFee" class="row mb-2 m-0">
+                        <div class="col-md-12 mt-4 p-0 table-responsive" style="border: 1px solid black;">
+                            <h5 class="text-center p-2">One Time Fees Section <span
+                                    class="bg-light float-right font-weight-bold text-danger">{{reportId}}</span> </h5>
+                            <table id="oneTimeFeeId" class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>One Time Deliverable</th>
+                                        <th>ERP</th>
+                                        <th>Unit Price</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th style="width:17%">Discount(%)</th>
+                                        <th>After Discount Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">1. Communication Services
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of oneTimeFeeData?.communicationServices;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,1)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">2. Integration Services
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of oneTimeFeeData?.integrationServices;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,2)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">3. Trading Partner and
+                                            Document Activation
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of oneTimeFeeData?.tpAndDocumentActivation;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,3)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">4. Administrative and
+                                            Management Services
+                                        </td>
+                                    </tr>
+                                    <tr
+                                        *ngFor="let item of oneTimeFeeData?.administrativeAndManagementServices;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity }}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,4)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">5. Community Management
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of oneTimeFeeData?.communityManagement;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,5)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">6. Project Management
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of oneTimeFeeData?.projectManagement;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,6)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">7. Other
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of oneTimeFeeData?.other;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,7)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div *ngIf="isRecurringFee" class="row mb-2 m-0">
+                        <div class="col-md-12 mt-4 p-0 table-responsive" style="border: 1px solid black;">
+                            <h5 class="text-center p-2">Recurring Fees Section <span
+                                    class="bg-light float-right font-weight-bold text-danger">{{reportId}}</span> </h5>
+                            <table id="recurringFeeId" class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Monthly Recurring Deliverable</th>
+                                        <th>Instructions</th>
+                                        <th>Unit Price</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th style="width:17%">Discount(%)</th>
+                                        <th>After Discount Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">1. Monthly Support Service
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of recurringFeeData?.monthlySupportService;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,8)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">2. Volume Plan
+                                        </td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="3"></td>
+                                        <td class="font-weight-bold">MAX Orders</td>
+                                        <td class="font-weight-bold">Rate</td>
+                                        <td class="font-weight-bold">Fixed Monthly</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr *ngFor="let item of recurringFeeData?.volumePlan;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td class="text-center">{{item.unitPrice}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,9)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">3. Service Bureau
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of recurringFeeData?.serviceBureau;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,10)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">4.NON EDI Formatted Fees
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of recurringFeeData?.nonEdiFormattedFees;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,11)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="text-center font-weight-bold">5. Other
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of recurringFeeData?.other;let i = index">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.price | currency:currency}}</td>
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
+                                                </div>
+                                                <input (keyup)="dicountChange($event,i,12)" type="number"
+                                                    placeholder="Enter Discount" value="{{item.discount}}"
+                                                    class="form-control" aria-label="%"
+                                                    aria-describedby="inputGroup-sizing-sm"
+                                                    onKeyPress="if(this.value.length==2) return false;">
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-info" (click)="hideShowTab(1)"> Back - Input
+                    </button>
+                    <button class="btn btn-sm btn-info float-right" (click)="hideShowTab(4)">Finalize & Print
+                        Pricing</button>
+                </p-tabPanel>
+                <p-tabPanel header="Finalize" [selected]="isTab4" [disabled]="!isTab4">
+                    <div class="pb-3 pr-5 pt-2">
+                        <button (click)="downloadReport()" class="btn btn-success float-right btn-sm"><i
+                                class="fa fa-download mr-2"></i>Download Pricing Table</button>
+                    </div>
+                    <div class="p-5">
+                        <h4><i class="fa fa-calculator"></i> Final Price Calculation Report <span
+                                class="float-right">Date :
+                                {{todayDate | date:'short'}}</span></h4>
+                        <hr>
+                        <div>
+                            <table id="finalReportId" class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>One Time Deliverable</th>
+                                        <th>ERP</th>
+                                        <th>Unit Price</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th style="width:17%">Discount(%)</th>
+                                        <th>After Discount Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="font-weight-bold text-center">One Time Fee
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(1)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Communication Services
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(1)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(1)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(oneTimeFeeData?.communicationServices) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(2)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Integration Services
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(2)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(2)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td style="font-weight: bold;color:red;">
+                                            {{ 0 + getSum(oneTimeFeeData?.integrationServices) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(3)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Trading Partner and
+                                            Document Activation
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(3)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(3)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(oneTimeFeeData?.tpAndDocumentActivation) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(4)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Administrative and
+                                            Management Services
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(4)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(4)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(oneTimeFeeData?.administrativeAndManagementServices) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(5)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Community Management
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(5)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(5)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(oneTimeFeeData?.communityManagement) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(6)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Project Management
+                                        </td>
+                                    </tr>
+
+                                    <tr *ngFor="let item of finalReportData(6)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(6)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(oneTimeFeeData?.projectManagement) | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(7)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Other
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(7)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.oneTimeDeliverable}}</td>
+                                        <td>{{item.erp}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(7)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(oneTimeFeeData?.other) | currency:currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8">
+                                        </td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="font-weight-bold text-center">Recurring Fee
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(8)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Monthly Support Service
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(8)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(8)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(recurringFeeData?.monthlySupportService) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(9)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Volume Plan
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(9)" class="bg-light">
+                                        <td colspan="3"></td>
+                                        <td class="font-weight-bold">MAX Orders</td>
+                                        <td class="font-weight-bold">Rate</td>
+                                        <td class="font-weight-bold">Fixed Monthly</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(9)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td>{{item.unitPrice}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(9)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(recurringFeeData?.volumePlan) | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(10)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Service Bureau
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(10)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(10)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(recurringFeeData?.serviceBureau) | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(11)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">NON EDI Formatted Fees
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(11)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(11)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(recurringFeeData?.nonEdiFormattedFees) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(12)" class="bg-light">
+                                        <td colspan="8" class="font-weight-bold">Other
+                                        </td>
+                                    </tr>
+                                    <tr *ngFor="let item of finalReportData(12)">
+                                        <td>{{item.item}}</td>
+                                        <td>{{item.monthlyRecurringDeliverable}}</td>
+                                        <td>{{item.instructions}}</td>
+                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency:currency}}</td>
+                                        <td>{{item.discount}}%</td>
+                                        <td>{{item.afterDiscountPrice | currency:currency}}</td>
+                                    </tr>
+                                    <tr *ngIf="showHideRow(12)">
+                                        <td colspan="7" class="font-weight-bold text-right">Total:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getSum(recurringFeeData?.other) | currency:currency}}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="7" class="font-weight-bold text-right">Total Of One Time Fees:</td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getTotalOneTimeFee(oneTimeFeeData) | currency:currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" class="font-weight-bold text-right">Total Of Recurring Fees:
+                                        </td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{ 0 + getTotalRecurringFee(recurringFeeData) | currency:currency}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" class="font-weight-bold text-right">Contract period to calculate
+                                            the TCV in months:
+                                        </td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{contractMonths}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" class="font-weight-bold text-right">Total Contract Value (TCV):
+                                        </td>
+                                        <td class="font-weight-bold text-danger">
+                                            {{(contractMonths * getTotalRecurringFee(recurringFeeData)) + getTotalOneTimeFee(oneTimeFeeData) | currency:currency}}
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </p-tabPanel>
+            </p-tabView>
+        </div>
+        <div class="col-md-3 f-12">
+            <div *ngIf="isTab1 || isTab2" class="card card-body bg-light position-fixed">
+                <h6 class="font-weight-bold mt-2 text-center">One Time Fees</h6>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Communication Services</p>
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.communicationServices) | currency:currency}}" 
+                        class="form-control col-md-3 p-1 h-30" readonly>
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Integration Services</p>
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.integrationServices) | currency:currency}}" 
+                        class="form-control col-md-3 p-1 h-30" readonly>
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">TP & Document Activation</p>
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.tpAndDocumentActivation) | currency:currency}}" 
+                        class="form-control col-md-3 p-1 h-30" readonly>
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Admin & Document Activation</p>
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.administrativeAndManagementServices) | currency:currency}}" 
+                        class="form-control col-md-3 p-1 h-30" readonly>
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Community Management</p>
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.communityManagement) | currency:currency}}" 
+                        class="form-control col-md-3 p-1 h-30" readonly>
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Project Management</p>
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.projectManagement) | currency:currency}}" 
+                        class="form-control col-md-3 p-1 h-30" readonly>
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Other</p>
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.other) | currency:currency}}" readonly 
+                        class="form-control col-md-3 p-1 h-30">
+                </div>
+
+                <h6 class="font-weight-bold mt-2 text-center">Recurring Fees</h6>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Monthly Support Service</p>
+                    <input value="{{ 0 + getSum(recurringFeeData?.monthlySupportService) | currency:currency}}" readonly 
+                        class="form-control col-md-3 p-1 h-30">
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Volume Plan</p>
+                    <input value="{{ 0 + getSum(recurringFeeData?.volumePlan) | currency:currency}}"  readonly
+                        class="form-control col-md-3 p-1 h-30">
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Service Bureau</p>
+                    <input value="{{ 0 + getSum(recurringFeeData?.serviceBureau) | currency:currency}}"  readonly
+                        class="form-control col-md-3 p-1 h-30">
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">NON-EDI formatted fees</p>
+                    <input value="{{ 0 + getSum(recurringFeeData?.nonEdiFormattedFees) | currency:currency}}"  readonly
+                        class="form-control col-md-3 p-1 h-30">
+                </div>
+                <div class="row mb-1">
+                    <p class="col-md-9 p-1 mb-0">Other</p>
+                    <input value="{{ 0 + getSum(recurringFeeData?.other) | currency:currency}}"  readonly
+                        class="form-control col-md-3 p-1 h-30">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

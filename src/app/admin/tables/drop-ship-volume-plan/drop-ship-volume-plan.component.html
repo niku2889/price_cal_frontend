@@ -1,0 +1,119 @@
+<p-toast [style]="{marginTop: '120px'}"></p-toast>
+<div class="container">
+    <div class="card mt-3 f-10">
+        <div class="card-header">
+            <h5>DROP SHIP VOLUME PLAN</h5>
+        </div>
+        <div class="card-body">
+            <p-table #dt [columns]="cols" [value]="planData" selectionMode="single" [(selection)]="selectedPlan"
+                (onRowSelect)="onRowSelect($event)" [paginator]="true" [rows]="15" >
+                <ng-template pTemplate="caption">
+                    <div style="text-align: right">
+                        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
+                        <input type="text" pInputText size="50" placeholder="Global Filter"
+                            (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto">
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th *ngFor="let col of columns" [pSortableColumn]="col.field">
+                            {{col.header}}
+                            <p-sortIcon [field]="col.field"></p-sortIcon>
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-columns="columns">
+                    <tr [pSelectableRow]="rowData">
+                        <td *ngFor="let col of columns">
+                            {{rowData[col.field]}}
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="summary" let-rowData>
+                    <div style="text-align:left">
+                        <button type="button" class="btn btn-sm btn-info" (click)="showDialogToAdd()"><i
+                                class="fa fa-plus"></i>
+                            Add</button>
+                    </div>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+
+
+    <p-dialog header="Plan Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
+        showEffect="fade" [modal]="true" [style]="{width: '600px'}">
+        <div class="ui-g ui-fluid" *ngIf="plan">
+            <div class="ui-g-12 p-1">
+                <div class="ui-g-8">
+                    <label class="font-weight-bold">Name</label>
+                    <input class="form-control" [(ngModel)]="plan.Plans" autofocus />
+                </div>
+                <div class="ui-g-4">
+                    <label class="font-weight-bold">Plan No.</label>
+                    <input class="form-control" [(ngModel)]="plan.PlanNo" autofocus type="number" />
+                </div>
+            </div>
+
+            <div class="ui-g-12 p-1">
+                <div class="ui-g-6">
+                    <label class="font-weight-bold"> Volume Orders Per Month</label>
+                    <input class="form-control" [(ngModel)]="plan.VolumeOrdersPerMonth" autofocus type="number" />
+                </div>
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Volume Orders Per Year</label>
+                    <input class="form-control" [(ngModel)]="plan.VolumeOrdersPerYear" autofocus type="number" />
+                </div>
+            </div>
+            <div class="ui-g-12 p-1">
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Yearly Cost</label>
+                    <input class="form-control" [(ngModel)]="plan.YearlyCost" autofocus type="number" />
+                </div>
+                <div class="ui-g-6">
+                    <label class="font-weight-bold"> Monthly Price</label>
+                    <input class="form-control" [(ngModel)]="plan.MonthlyPrice" autofocus type="number" />
+                </div>
+            </div>
+            <div class="ui-g-12 p-1">
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Average Price Per Order</label>
+                    <input class="form-control" [(ngModel)]="plan.AveragePricePerOrder" autofocus type="number" />
+                </div>
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Average Fee</label>
+                    <input class="form-control" [(ngModel)]="plan.AverageFee" autofocus type="number" />
+                </div>
+            </div>
+            <div class="ui-g-12 p-1">
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Cost For The Year2</label>
+                    <input class="form-control" [(ngModel)]="plan.CostForTheYear2" autofocus type="number" />
+                </div>
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Monthly Price3</label>
+                    <input class="form-control" [(ngModel)]="plan.MonthlyPrice3" autofocus type="number" />
+                </div>
+            </div>
+            <div class="ui-g-12 p-1">
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Average Price Per Order4</label>
+                    <input class="form-control" [(ngModel)]="plan.AveragePricePerOrder4" autofocus type="number" />
+                </div>
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Average Fee5</label>
+                    <input class="form-control" [(ngModel)]="plan.AverageFee5" autofocus type="number" />
+                </div>
+            </div>
+
+        </div>
+        <p-footer>
+            <div class="ui-dialog-buttonpane ui-helper-clearfix">
+                <button type="button" class="btn btn-sm btn-danger" (click)="delete()"><i
+                        class="fa fa-close"></i>Delete</button>
+                <button type="button" class="btn btn-sm btn-primary" (click)="save()"><i
+                        class="fa fa-check"></i>Save</button>
+            </div>
+        </p-footer>
+    </p-dialog>
+</div>

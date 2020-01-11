@@ -1,0 +1,22 @@
+<mat-toolbar color="primary" class="mat-elevation-z1">
+    <button mat-icon-button id="menu" (click)="navService.openNav()">
+        <mat-icon>menu</mat-icon>
+    </button>
+    <span class="ml-3">
+        <a style="color: white;" class="navbar-brand" routerLink="/admin">
+            <i class="fa fa-calculator"></i> PRICING CALCULATOR
+        </a>
+    </span>
+    <div class="w-100">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active" ngbDropdown>
+                <a class="nav-link float-right" style="cursor: pointer" ngbDropdownToggle id="navbarDropdown" role="button">
+                    <i class="fa fa-user"></i> {{name}}
+                </a>
+                <div ngbDropdownMenu aria-labelledby="navbarDropdown" class="dropdown-menu dropdown-menu-right">
+                    <a ngbDropdownItem routerLink="/login">Log Out</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</mat-toolbar>

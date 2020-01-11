@@ -1,0 +1,7 @@
+:host ::ng-deep .ui-widget {
+    font-size: 11px;
+}
+
+.form-control {
+    font-size: 0.7rem!important;
+}

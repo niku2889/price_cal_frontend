@@ -1,0 +1,63 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" routerLink="/admin">
+        <i class="fa fa-calculator"></i> PRICING CALCULATOR
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto ml-5">
+            <li class="nav-item active" ngbDropdown>
+                <a class="nav-link" style="cursor: pointer" ngbDropdownToggle id="navbarDropdown" role="button">
+                    Tables
+                </a>
+                <div ngbDropdownMenu aria-labelledby="navbarDropdown" class="dropdown-menu">
+                    <a ngbDropdownItem routerLink="/admin/erp">ERP</a>
+                    <a ngbDropdownItem routerLink="/admin/edidocs">EDI DOCS</a>
+                    <a ngbDropdownItem routerLink="/admin/mskbplan">MS KB PLAN</a>
+                    <a ngbDropdownItem routerLink="/admin/dropshipvolumeplan">DROP SHIP VOLUME PLAN</a>
+                    <a ngbDropdownItem routerLink="/admin/admincmf">COMMUNITY MANAGEMENT FEE</a>
+                    <a ngbDropdownItem routerLink="/admin/communicationfees">COMMUNICATION FEE</a>
+                    <a ngbDropdownItem routerLink="/admin/complaincefee">COMPLAINCE FEE</a>
+                    <a ngbDropdownItem routerLink="/admin/diametricsfee">DIAMETRICS FEE</a>
+                    <a ngbDropdownItem routerLink="/admin/diametricsfee2">DIAMETRICS FEE2</a>
+                    <a ngbDropdownItem routerLink="/admin/ecommerceprocess">ECOMMERCE PROCESS</a>
+                    <a ngbDropdownItem routerLink="/admin/pmfees">PM FEE</a>
+                    <a ngbDropdownItem routerLink="/admin/servicebureaufees">SERVICE BUREAU FEE</a>
+                    <a ngbDropdownItem routerLink="/admin/currencyconvertion">CURRENCY CONVERTION</a>
+                </div>
+            </li>
+            <li class="nav-item active" ngbDropdown>
+                <a class="nav-link" style="cursor: pointer" ngbDropdownToggle id="navbarDropdown" role="button">
+                    Reports
+                </a>
+                <div ngbDropdownMenu aria-labelledby="navbarDropdown" class="dropdown-menu">
+                    <a ngbDropdownItem routerLink="/admin">ERP</a>
+                </div>
+            </li>
+            <li *ngIf="isSA == 'true'" class="nav-item active" ngbDropdown>
+                <a class="nav-link" routerLink="/admin/users" style="cursor: pointer" role="button">
+                    Users
+                </a>
+
+            </li>
+        </ul>
+        <div class="form-inline">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active" ngbDropdown>
+                    <a class="nav-link" style="cursor: pointer" ngbDropdownToggle id="navbarDropdown" role="button">
+                        <i class="fa fa-user"></i> {{name}}
+                    </a>
+                    <div ngbDropdownMenu aria-labelledby="navbarDropdown" class="dropdown-menu dropdown-menu-right">
+                        <a ngbDropdownItem routerLink="/login">Log Out</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav> 
+
+
+
