@@ -17,14 +17,14 @@
             <div class="input-group-prepend">
                 <span class="input-group-text"><i class="fa fa-envelope"></i></span>
             </div>
-            <input type="text" formControlName="email" class="form-control" placeholder="Email Address" required>
+            <input type="text" formControlName="email" class="form-control" placeholder="Email Address (test@dicentral.com)" required>
         </div>
         <div *ngIf="form.controls['email'].invalid && (form.controls['email'].dirty || form.controls['email'].touched)"
             class="alert alert-danger">
             <div *ngIf="form.controls['email'].errors.required">
                 Email is required.
             </div>
-            <div *ngIf="form.controls['email'].errors.email">
+            <div *ngIf="form.controls['email'].errors.email || form.controls['email'].invalid">
                 Invalid email format.
             </div>
         </div>
@@ -32,7 +32,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text"><i class="fa fa-handshake-o"></i></span>
             </div>
-            <input type="number" formControlName="dealId" class="form-control" placeholder="Enter the Deal-id" required>
+            <input type="number" formControlName="dealId" class="form-control" placeholder="Enter the Deal Id" required>
         </div>
         <div *ngIf="form.controls['dealId'].invalid && (form.controls['dealId'].dirty || form.controls['dealId'].touched)"
             class="alert alert-danger">

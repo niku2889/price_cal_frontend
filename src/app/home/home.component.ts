@@ -538,7 +538,7 @@ export class HomeComponent implements OnInit {
     } else if (index == 8) {
       return this.recurringFeeData != null ? this.recurringFeeData.monthlySupportService.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
     } else if (index == 9) {
-      return this.recurringFeeData != null ? this.recurringFeeData.volumePlan.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
+      return this.recurringFeeData != null ? this.recurringFeeData.volumePlan : [];
     } else if (index == 10) {
       return this.recurringFeeData != null ? this.recurringFeeData.serviceBureau.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
     } else if (index == 11) {
@@ -574,7 +574,7 @@ export class HomeComponent implements OnInit {
       let d = this.recurringFeeData != null ? this.recurringFeeData.monthlySupportService.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
       return d.length > 0 ? true : false;
     } else if (index == 9) {
-      let d = this.recurringFeeData != null ? this.recurringFeeData.volumePlan.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
+      let d = this.recurringFeeData != null ? this.recurringFeeData.volumePlan : [];
       return d.length > 0 ? true : false;
     } else if (index == 10) {
       let d = this.recurringFeeData != null ? this.recurringFeeData.serviceBureau.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
@@ -904,6 +904,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
+
   //One Time Fees -  Integration Services - Secondary Adapter - 2 - array 1
   addSecondaryIntegrationServices(total) {
     if (this.selectedSecondaryIntegrationMethod != "") {
@@ -1068,7 +1069,6 @@ export class HomeComponent implements OnInit {
 
   //Recurring Fees - Volume Plan - 2 - array 1
   addDropShipPlanRecurringFee2(deliverable, instruction, fixedRate) {
-    this.recurringFeeData.volumePlan[1].item = this.dsvpSelectedPlan;
     this.recurringFeeData.volumePlan[1].monthlyRecurringDeliverable = deliverable;
     this.recurringFeeData.volumePlan[1].instruction = instruction;
     this.recurringFeeData.volumePlan[1].quantity = fixedRate;
@@ -1133,6 +1133,26 @@ export class HomeComponent implements OnInit {
         up = 3.3;
 
       let price = ((this.oneTimeFeeData.integrationServices[0].price + this.oneTimeFeeData.integrationServices[1].price) * up) / 100;
+      this.addMSPIntegrationService(instruction, up, price);
+
+      let price1 = ((this.oneTimeFeeData.communityManagement[0].price + this.oneTimeFeeData.communityManagement[5].price) * up) / 100;
+      this.addMSPCommunityManagement(instruction, up, price1);
+    }
+  }
+
+  //Recurring Fees - Monthly Support Service - Communications Services - 1 - array 0
+  addMonthlySupportService(){
+    if (this.dsvpSelectedServicePlan != '') {
+      let instruction = this.dsvpSelectedServicePlan + ' Support';
+      let up;
+      if (this.dsvpSelectedServicePlan == "Standard")
+        up = 1.7;
+      else if (this.dsvpSelectedServicePlan == "Advanced")
+        up = 2.5;
+      else if (this.dsvpSelectedServicePlan == "Premium")
+        up = 3.3;
+
+      let price = ((this.oneTimeFeeData.communicationServices[0].price + this.oneTimeFeeData.communicationServices[1].price) * up) / 100;
       this.addMSPIntegrationService(instruction, up, price);
 
       let price1 = ((this.oneTimeFeeData.communityManagement[0].price + this.oneTimeFeeData.communityManagement[5].price) * up) / 100;
@@ -2056,7 +2076,10 @@ export class HomeComponent implements OnInit {
 export class DialogOverviewExampleDialog {
   form: FormGroup = new FormGroup({
     userName: new FormControl('', Validators.required),
-    email: new FormControl('', [Validators.required, Validators.email]),
+    email: new FormControl('', Validators.compose([
+      Validators.required,
+      Validators.pattern('^[a-zA-Z0-9_.+-]+@(?:(?:[a-zA-Z0-9-]+\.)?[a-zA-Z]+\.)?(dicentral)\.com$')
+    ])),
     dealId: new FormControl('', [Validators.required]),
     customerName: new FormControl('', [Validators.required]),
     currency: new FormControl('USD', [Validators.required]),
