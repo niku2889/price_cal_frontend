@@ -98,10 +98,17 @@ export class AdminComponent implements OnInit, AfterViewInit {
       iconName: 'picture_as_pdf',
       route: 'admin/reports',
     },
+    {
+      displayName: 'Logs',
+      iconName: 'history',
+      route: 'admin/logs',
+    },
   ];
   constructor(private navService: NavService) {
     this.name = localStorage.getItem('name');
     this.isSA = localStorage.getItem('superAdmin');
+    if(this.isSA == false || this.isSA == 'false')
+      this.navItems = this.navItems.filter(a => a.displayName != 'Users' && a.displayName != 'Logs');
   }
 
   ngOnInit() {

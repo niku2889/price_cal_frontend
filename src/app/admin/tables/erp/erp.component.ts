@@ -48,20 +48,6 @@ export class ErpComponent implements OnInit {
       });
   }
 
-  deleteOne(id) {
-    if (confirm("Are you sure you want to delete this record?")) {
-      this.service.deleteErpId(id)
-        .subscribe(data1 => {
-          let index = this.erpData.indexOf(id);
-          this.erpData = this.erpData.filter((val, i) => i != index);
-          this.erp = null;
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
-        }, err => {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
-        });
-    }
-  }
-
   delete() {
     if (confirm("Are you sure you want to delete this record?")) {
       this.service.deleteErpId(this.selectedErp.Id)
@@ -71,6 +57,9 @@ export class ErpComponent implements OnInit {
           this.erp = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
+          this.service.addLogs('ERP', this.selectedErp.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -84,11 +73,9 @@ export class ErpComponent implements OnInit {
   }
 
   onRowSelect(event) {
-    console.log(event)
     this.newErp = false;
     this.erp = this.cloneCar(event.data);
     this.displayDialog = true;
-    console.log(this.erp)
   }
 
   cloneCar(c: Erp): Erp {
@@ -106,6 +93,9 @@ export class ErpComponent implements OnInit {
         .subscribe(data1 => {
           this.erpData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
+          this.service.addLogs('ERP', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -115,6 +105,9 @@ export class ErpComponent implements OnInit {
         .subscribe(data1 => {
           erps[this.erpData.indexOf(this.selectedErp)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
+          this.service.addLogs('ERP', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });

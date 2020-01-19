@@ -17,17 +17,20 @@ export interface Plan {
 })
 export class AdminUsersComponent implements OnInit {
 
-  
+
   cols: any[];
   planData: any[] = [];
   displayDialog: boolean;
   plan: Plan = {};
   selectedPlan: Plan;
   newPlan: boolean;
-
+  isSA;
+  permission = true;
   constructor(private service: AdminService,
     private messageService: MessageService) {
-
+    this.isSA = localStorage.getItem('superAdmin');
+    if (this.isSA == false || this.isSA == 'false')
+      this.permission = false;
     this.cols = [
       { field: 'Name', header: 'Name' },
       { field: 'Email', header: 'Email' },
@@ -56,6 +59,9 @@ export class AdminUsersComponent implements OnInit {
           this.plan = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
+          this.service.addLogs('AdminUsers', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
+            .subscribe(l => {
+            });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -89,6 +95,9 @@ export class AdminUsersComponent implements OnInit {
         .subscribe(data1 => {
           this.planData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
+          this.service.addLogs('AdminUsers', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -98,6 +107,9 @@ export class AdminUsersComponent implements OnInit {
         .subscribe(data1 => {
           erps[this.planData.indexOf(this.selectedPlan)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
+          this.service.addLogs('AdminUsers', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });

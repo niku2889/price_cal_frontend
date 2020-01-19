@@ -64,6 +64,8 @@ import { AdminUsersComponent } from './admin/admin-users/admin-users.component';
 import { TopNavComponent } from './admin/top-nav/top-nav.component';
 import { NavService } from './admin/nav.service';
 import { ReportsComponent } from './admin/reports/reports.component';
+import { LogsComponent } from './admin/logs/logs.component';
+import {TooltipModule} from 'primeng/tooltip';
 
 @NgModule({
   declarations: [
@@ -90,7 +92,8 @@ import { ReportsComponent } from './admin/reports/reports.component';
     AdminUsersComponent,
     MenuListItemComponent,
     TopNavComponent,
-    ReportsComponent
+    ReportsComponent,
+    LogsComponent
   ],
   imports: [
     BrowserModule,
@@ -134,6 +137,7 @@ import { ReportsComponent } from './admin/reports/reports.component';
     MatToolbarModule,
     MatTooltipModule,
     MatNativeDateModule,
+    TooltipModule,
   ],
   providers: [NavService],
   entryComponents: [DialogOverviewExampleDialog],

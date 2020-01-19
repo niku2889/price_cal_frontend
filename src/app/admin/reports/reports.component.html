@@ -19,7 +19,7 @@
                             {{col.header}}
                             <p-sortIcon [field]="col.field"></p-sortIcon>
                         </th>
-                        <th></th>
+                        <th style="width:17%;"></th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-rowData let-columns="columns">
@@ -31,6 +31,12 @@
                             <a style="cursor: pointer;" (click)="generateReport(rowData['Id'],rowData)">
                                 <mat-icon>assignment</mat-icon>
                             </a>
+                            <button class="btn btn-info btn-sm m-1" (click)="input(rowData['Id'])">
+                                Input
+                            </button>
+                            <button class="btn btn-info btn-sm m-1" (click)="output(rowData['Id'])">
+                                Output
+                            </button>
                         </td>
                     </tr>
                 </ng-template>
@@ -39,7 +45,7 @@
         </div>
     </div>
     <p-dialog header="Report Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
-        showEffect="fade" [modal]="true" [style]="{width: '800px'}" [autoZIndex]="false">
+        showEffect="fade" [modal]="true" [style]="{width: '900px'}" [autoZIndex]="false">
         <div class="pb-3 pr-5 pt-2">
             <button (click)="downloadReport()" class="btn btn-success float-right btn-sm"><i
                     class="fa fa-download mr-2"></i>Download Pricing Table</button>
@@ -50,7 +56,11 @@
             <hr>
             <div>
                 <table id="finalReportId" class="table table-bordered table-sm">
-                    <thead>
+                    <tbody>
+                        <tr class="bg-light">
+                            <td colspan="8" class="font-weight-bold text-center">One Time Fee
+                            </td>
+                        </tr>
                         <tr>
                             <th>Item</th>
                             <th>One Time Deliverable</th>
@@ -60,12 +70,6 @@
                             <th>Price</th>
                             <th style="width:17%">Discount(%)</th>
                             <th>After Discount Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="bg-light">
-                            <td colspan="8" class="font-weight-bold text-center">One Time Fee
-                            </td>
                         </tr>
                         <tr *ngIf="showHideRow(1)" class="bg-light">
                             <td colspan="8" class="font-weight-bold">Communication Services
@@ -216,6 +220,16 @@
                             <td colspan="8" class="font-weight-bold text-center">Recurring Fee
                             </td>
                         </tr>
+                        <tr>
+                            <th>Item</th>
+                            <th>Monthly Recurring Deliverable</th>
+                            <th>Instructions</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Discount(%)</th>
+                            <th>After Discount Price</th>
+                        </tr>
                         <tr *ngIf="showHideRow(8)" class="bg-light">
                             <td colspan="8" class="font-weight-bold">Monthly Support Service
                             </td>
@@ -224,7 +238,12 @@
                             <td>{{item.Item}}</td>
                             <td>{{item.OneTimeDeliverable}}</td>
                             <td>{{item.Erp}}</td>
-                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td> <span
+                                    *ngIf="item.OneTimeDeliverable == 'Administration and Management Services' || 
+                                item.OneTimeDeliverable == 'Trading Community'">{{item.UnitPrice | currency:currency}}</span>
+                                <span *ngIf="item.OneTimeDeliverable == 'Communications Services' || 
+                            item.OneTimeDeliverable == 'Integration Service' ||
+                            item.OneTimeDeliverable == 'Community management'">{{item.UnitPrice}}%</span></td>
                             <td>{{item.Quantity}}</td>
                             <td>{{item.Price | currency:currency}}</td>
                             <td>{{item.Discount}}%</td>
@@ -237,12 +256,12 @@
                             </td>
                         </tr>
                         <tr *ngIf="showHideRow(9)" class="bg-light">
-                            <td colspan="8" class="font-weight-bold">Volume Plan
+                            <td colspan="8" class="font-weight-bold">KB/Volume Plan
                             </td>
                         </tr>
                         <tr *ngIf="showHideRow(9)" class="bg-light">
                             <td colspan="3"></td>
-                            <td class="font-weight-bold">MAX Orders</td>
+                            <td class="font-weight-bold">MAX Orders/Kb's</td>
                             <td class="font-weight-bold">Rate</td>
                             <td class="font-weight-bold">Fixed Monthly</td>
                             <td colspan="2"></td>
@@ -251,7 +270,7 @@
                             <td>{{item.Item}}</td>
                             <td>{{item.OneTimeDeliverable}}</td>
                             <td>{{item.Erp}}</td>
-                            <td>{{item.UnitPrice | currency:currency}}</td>
+                            <td>{{item.UnitPrice}}</td>
                             <td>{{item.Quantity}}</td>
                             <td>{{item.Price | currency:currency}}</td>
                             <td>{{item.Discount}}%</td>
@@ -351,6 +370,243 @@
                     </tfoot>
                 </table>
             </div>
+        </div>
+    </p-dialog>
+    <p-dialog header="Input Details" [(visible)]="displayDialog1" [focusOnShow]="false" [responsive]="true"
+        showEffect="fade" [modal]="true" [style]="{width: '900px'}" [autoZIndex]="false">
+        <div class="p-1 table-responsive">
+            <table class="table table-bordered table-sm">
+                <tr>
+                    <th>ERP </th>
+                    <th>MS / E-Commerce</th>
+                    <th>Buy Side</th>
+                    <th>Sell Side</th>
+                    <th>Need to Create EDI Specifications Booklet for TP's</th>
+                    <th>Need to implement a Compliance test program</th>
+                    <th>Choose Who pays for it</th>
+                    <th>No of Trading Partnerrs to be compliance tested</th>
+                    <th>Need to provide labels</th>
+                    <th>No. of retailer divisions needing labels</th>
+                    <th>Is the HUB paying for suppliers?</th>
+                    <th>Is this a private Portal?</th>
+                    <th>No. of Trading partners using the Portal</th>
+                    <th>No. EDI</th>
+                    <th>No. NON-EDI</th>
+                    <th>Choose min no. of KB</th>
+                    <th>Selected Plan</th>
+                    <th>Service Plan Offered</th>
+                    <th>Standard Replenishment / Drop Ship Program </th>
+                    <th>Annual Plan / Monthly Plan</th>
+                    <th>Primary integration Methodology</th>
+                    <th>More than one integration Methodology?</th>
+                    <th>Secondary integration Methodology</th>
+                    <th>Are all TP's using only EDI Standards?</th>
+                    <th>No. of electronically integrated NON EDI TP</th>
+                    <th>Addiitonal Services?</th>
+                    <th>DiPulse</th>
+                    <th>No. of Additional DiPulse id's needed beyond Master's ID</th>
+                    <th>DiMetrics</th>
+                    <th>Number of Business Rules</th>
+                    <th>Number of Documents used in Business Rules</th>
+                    <th>Should DiMetrics host any customer files administered by customer</th>
+                    <th>No. of KB associated will they be hosting each month</th>
+                    <th>Service Bureau</th>
+                    <th>How many documents will service bureau users be implementing?</th>
+                    <th>Will Sponsor be paying for the Service Bureau Users?</th>
+                    <th>How many service bureau users will be there in this project?</th>
+                    <th>How many documents (850, 855, 865, 810) per month?</th>
+                    <th>How many Documents (856) per month?</th>
+                    <th>Monthly Line Items for all Users</th>
+                    <th>Labels are the Service Bureau users planning per month?</th>
+                    <th>Communication Software</th>
+                    <th>Identify the SW to be used for Integration</th>
+                    <th>Protocol that Client uses to connect to DICentral</th>
+                    <th>Onsite Professional Services</th>
+                    <th>How many hours are needed on the site?</th>
+                </tr>
+                <tr *ngFor="let i of inputData">
+                    <td>{{i.MERP}}</td>
+                    <td>{{i.MMsEcommerce}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.MBuySide"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="i.MSellSide"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="i.MBuySideEdiSpecBookletTP"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="i.MBuySideComTestProgram"></mat-checkbox>
+                    </td>
+                    <td>{{i.MBuySideWhoPays}}</td>
+                    <td>{{i.MBuySideNoTPComTest}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.MBuySideProvideLabels"></mat-checkbox>
+                    </td>
+                    <td>{{i.MBuySideRetailerNeedLabels}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.MBuySideIsHubPaying"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="i.MBuySideIsPrivatePortal"></mat-checkbox>
+                    </td>
+                    <td>{{i.MBuySideNoTPUsingPortal}}</td>
+                    <td>{{i.MNoEdi}}</td>
+                    <td>{{i.MNoNonEdi}}</td>
+                    <td>{{i.MKBPlan}}</td>
+                    <td>{{i.MSelectedKBPlan}}</td>
+                    <td>{{i.MServicePlan}}</td>
+                    <td>{{i.MServicePlan1}}</td>
+                    <td>{{i.MServicePlan2}}</td>
+                    <td>{{i.MPrimaryInteration}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.MSecondaryIntegration != '' ? true : false"></mat-checkbox>
+                    </td>
+                    <td>{{i.MSecondaryIntegration}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.MTPUsingEDIStandard"></mat-checkbox>
+                    </td>
+                    <td>{{i.MElectoicallyNonEdiTp}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.MAdditionalServices"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="i.ADiPulse"></mat-checkbox>
+                    </td>
+                    <td>{{i.ADiPulseNoAdditionalId}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.ADiMetrics"></mat-checkbox>
+                    </td>
+                    <td>{{i.ADiMetricsBusinessRule}}</td>
+                    <td>{{i.ADiMetricsNoDocuments}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.ADiMetricsHostCustomer"></mat-checkbox>
+                    </td>
+                    <td>{{i.ADiMetricsNoKBAssociated}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.AServiceBureau"></mat-checkbox>
+                    </td>
+                    <td>{{i.AServiceBureauHowManyDocs}}</td>
+                    <td>{{i.AServiceBureauSponsorUsers}}</td>
+                    <td>{{i.AServiceBureauUsersInProject}}</td>
+                    <td>{{i.AServiceBureau850855865810DocsPerMonth}}</td>
+                    <td>{{i.AServiceBureau856DocsPerMonth}}</td>
+                    <td>{{i.AServiceBureauLineItemsUsers}}</td>
+                    <td>{{i.AServiceBureauLabelsPerMonth}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.ACommunicationSoftware"></mat-checkbox>
+                    </td>
+                    <td>{{i.ACommunicationSoftwareForIntegration}}</td>
+                    <td>{{i.ACommunicationSoftwareProtocol}}</td>
+                    <td>
+                        <mat-checkbox [checked]="i.AOnsiteProfessionalServices"></mat-checkbox>
+                    </td>
+                    <td>{{i.AOnsiteProfessionalServicesHours}}</td>
+                </tr>
+            </table>
+            <table class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Select EDI Documents in Scope</th>
+                        <th>No. of TP's Corresponding to EDI Docs</th>
+                        <th>Integrated to ERP / DiPulse</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let i of ediData">
+                        <td>
+                            <select class="form-control" [(ngModel)]="i.EdiDocs" readonly>
+                                <option *ngFor="let item of ediDataAll" value="{{item.Id}}">
+                                    {{item.EdiDocs}}</option>
+                            </select>
+                        </td>
+                        <td>{{i.NoOfTP}}
+                        </td>
+                        <td>{{i.IntegratedErpDiPulse}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Select documents in scope used by NON EDI TP's</th>
+                        <th>Number of NON-EDI TP's under each document</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let i of nonEdiData">
+                        <td>
+                            <select [(ngModel)]="i.NonEdiDocs" class="form-control" readonly>
+                                <option *ngFor="let item of ediDataAll" value="{{item.Id}}">
+                                    {{item.EdiDocs}}</option>
+                            </select>
+                        </td>
+                        <td>{{i.NoOfTP}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-bordered table-sm">
+                <tr>
+                    <th>Name</th>
+                    <th>Orders</th>
+                    <th>Product</th>
+                    <th>Fullfilment</th>
+                    <th>Inventory</th>
+                    <th>Payment</th>
+                </tr>
+                <tr *ngFor="let item of ecomData">
+                    <td>{{item.Name}}</td>
+                    <td>
+                        <mat-checkbox [checked]="item.Orders"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="item.Product"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="item.Fullfilment"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="item.Inventory"></mat-checkbox>
+                    </td>
+                    <td>
+                        <mat-checkbox [checked]="item.Payment"></mat-checkbox>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </p-dialog>
+    <p-dialog header="Output Details" [(visible)]="displayDialog2" [focusOnShow]="false" [responsive]="true"
+        showEffect="fade" [modal]="true" [style]="{width: '900px'}" [autoZIndex]="false">
+        <div class="p-1">
+            <p-table #dt [columns]="cols2" [value]="reportDetailsData" [paginator]="true" [rows]="15"
+                [responsive]="true">
+                <ng-template pTemplate="caption">
+                    <div style="text-align: right">
+                        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
+                        <input type="text" pInputText size="50" placeholder="Global Filter"
+                            (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto">
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th [style.width]="col.header == 'Section' ? '25%' : 'auto'" *ngFor="let col of columns"
+                            [pSortableColumn]="col.field">
+                            {{col.header}}
+                            <p-sortIcon [field]="col.field"></p-sortIcon>
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-columns="columns">
+                    <tr>
+                        <td *ngFor="let col of columns">
+                            {{rowData[col.field]}}
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
         </div>
     </p-dialog>
 </div>

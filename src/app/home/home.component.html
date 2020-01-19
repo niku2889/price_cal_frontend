@@ -11,12 +11,39 @@
 
 <div class="m-3">
     <p-toast position="top-right"></p-toast>
+    <div class="row mb-2 m-0 alert alert-info">
+        <div class="col-md-2">
+            <p class="f-12 mb-0">User Name</p>
+            <p class="f-12 font-weight-bold mb-0">{{name}}</p>
+        </div>
+        <div class="col-md-2">
+            <p class="f-12 mb-0">Email</p>
+            <p class="f-12 font-weight-bold mb-0">{{email}}</p>
+        </div>
+        <div class="col-md-2">
+            <p class="f-12 mb-0">Customer Name</p>
+            <p class="f-12 font-weight-bold mb-0">{{customerName}}</p>
+        </div>
+        <div class="col-md-2">
+            <p class="f-12 mb-0">Deal Id</p>
+            <p class="f-12 font-weight-bold mb-0">{{dealId}}</p>
+        </div>
+        <div class="col-md-2">
+            <p class="f-12 mb-0">Currency</p>
+            <p class="f-12 font-weight-bold mb-0">{{currency}}</p>
+        </div>
+        <div class="col-md-2">
+            <button *ngIf="!isTab4" (click)="editPopup()" class="btn btn-sm btn-primary">Edit</button>
+        </div>
+    </div>
     <div class="row">
         <div [class.col-md-12]="isTab3" [class.col-md-9]="!isTab3   ">
             <p-tabView (onChange)="handleChange($event)">
                 <p-tabPanel header="Managed Services Input" [selected]="isTab1" [disabled]="!isTab1">
                     <div class="row">
+
                         <div class="col-md-12">
+
                             <div class="row mb-2 m-0">
                                 <label class="col-md-4 p-1">Select an ERP</label>
                                 <select [(ngModel)]="selectedErp" (ngModelChange)="changeErp($event)"
@@ -157,10 +184,13 @@
                                                 </td>
                                                 <td><input [(ngModel)]="i.noOfTP" class="form-control" type="number"
                                                         (keyup)="changeEdiTP($event)" placeholder="Enter Number Here"
-                                                        value="0" min="0">
+                                                        value="0" min="0"
+                                                        pTooltip="Enter a number equal or higher than the max of the tps per doc"
+                                                        tooltipPosition="top">
                                                 </td>
                                                 <td>
-                                                    <select class="form-control" [(ngModel)]="i.integratedERPDiPulse" (ngModelChange)="ediDocsSelectChange($event)">
+                                                    <select class="form-control" [(ngModel)]="i.integratedERPDiPulse"
+                                                        (ngModelChange)="ediDocsSelectChange($event)">
                                                         <option value=""></option>
                                                         <option>Only be used in DiPulse</option>
                                                         <option>Outbound from Trading Partner</option>
@@ -821,7 +851,11 @@
                                         <td>{{item.item}}</td>
                                         <td>{{item.monthlyRecurringDeliverable}}</td>
                                         <td>{{item.instructions}}</td>
-                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">
+                                            <span
+                                                *ngIf="i == 3 || i == 4 || i == 5">{{item.unitPrice | currency:currency}}</span>
+                                            <span *ngIf="i == 0 || i == 1 || i == 2">{{item.unitPrice}}%</span>
+                                        </td>
                                         <td class="text-center">{{item.quantity}}</td>
                                         <td class="text-center">{{item.price | currency:currency}}</td>
                                         <td>
@@ -839,12 +873,12 @@
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
                                     </tr>
                                     <tr class="bg-light">
-                                        <td colspan="8" class="text-center font-weight-bold">2. Volume Plan
+                                        <td colspan="8" class="text-center font-weight-bold">2. {{headerPlan}}
                                         </td>
                                     </tr>
                                     <tr class="bg-light">
                                         <td colspan="3"></td>
-                                        <td class="font-weight-bold">MAX Orders</td>
+                                        <td class="font-weight-bold">{{headerPlanSub}}</td>
                                         <td class="font-weight-bold">Rate</td>
                                         <td class="font-weight-bold">Fixed Monthly</td>
                                         <td colspan="2"></td>
@@ -857,7 +891,7 @@
                                         <td class="text-center">{{item.quantity}}</td>
                                         <td class="text-center">{{item.price | currency:currency}}</td>
                                         <td>
-                                            <div class="input-group input-group-sm">
+                                            <div *ngIf="item.discount != null" class="input-group input-group-sm">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text" id="inputGroup-sizing-sm">%</span>
                                                 </div>
@@ -955,7 +989,9 @@
                         Pricing</button>
                 </p-tabPanel>
                 <p-tabPanel header="Finalize" [selected]="isTab4" [disabled]="!isTab4">
-                    <div class="pb-3 pr-5 pt-2">
+                    <div class="pb-3 pr-5 pt-2 pl-5">
+                        <button (click)="newReport()" class="btn btn-info float-left btn-sm">Generate New
+                            Report</button>
                         <button (click)="downloadReport()" class="btn btn-success float-right btn-sm"><i
                                 class="fa fa-download mr-2"></i>Download Pricing Table</button>
                     </div>
@@ -966,7 +1002,11 @@
                         <hr>
                         <div>
                             <table id="finalReportId" class="table table-bordered table-sm">
-                                <thead>
+                                <tbody>
+                                    <tr class="bg-light">
+                                        <td colspan="8" class="font-weight-bold text-center">One Time Fee
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <th>Item</th>
                                         <th>One Time Deliverable</th>
@@ -976,12 +1016,6 @@
                                         <th>Price</th>
                                         <th style="width:17%">Discount(%)</th>
                                         <th>After Discount Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="bg-light">
-                                        <td colspan="8" class="font-weight-bold text-center">One Time Fee
-                                        </td>
                                     </tr>
                                     <tr *ngIf="showHideRow(1)" class="bg-light">
                                         <td colspan="8" class="font-weight-bold">Communication Services
@@ -1125,22 +1159,40 @@
                                             {{ 0 + getSum(oneTimeFeeData?.other) | currency:currency}}</td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8">
+                                        <td colspan="8" style="height: 50px;">
                                         </td>
                                     </tr>
                                     <tr class="bg-light">
                                         <td colspan="8" class="font-weight-bold text-center">Recurring Fee
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Monthly Recurring Deliverable</th>
+                                        <th>Instructions</th>
+                                        <th>Unit Price</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Discount(%)</th>
+                                        <th>After Discount Price</th>
+                                    </tr>
                                     <tr *ngIf="showHideRow(8)" class="bg-light">
                                         <td colspan="8" class="font-weight-bold">Monthly Support Service
                                         </td>
                                     </tr>
-                                    <tr *ngFor="let item of finalReportData(8)">
+                                    <tr *ngFor="let item of finalReportData(8);let i = index;">
                                         <td>{{item.item}}</td>
                                         <td>{{item.monthlyRecurringDeliverable}}</td>
                                         <td>{{item.instructions}}</td>
-                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>
+                                            <span
+                                                *ngIf="item.monthlyRecurringDeliverable == 'Administration and Management Services' || 
+                                                item.monthlyRecurringDeliverable == 'Trading Community'">{{item.unitPrice | currency:currency}}</span>
+                                            <span
+                                                *ngIf="item.monthlyRecurringDeliverable == 'Communications Services' || 
+                                            item.monthlyRecurringDeliverable == 'Integration Service' ||
+                                            item.monthlyRecurringDeliverable == 'Community management'">{{item.unitPrice}}%</span>
+                                        </td>
                                         <td>{{item.quantity}}</td>
                                         <td>{{item.price | currency:currency}}</td>
                                         <td>{{item.discount}}%</td>
@@ -1153,12 +1205,12 @@
                                         </td>
                                     </tr>
                                     <tr *ngIf="showHideRow(9)" class="bg-light">
-                                        <td colspan="8" class="font-weight-bold">Volume Plan
+                                        <td colspan="8" class="font-weight-bold">{{headerPlan}}
                                         </td>
                                     </tr>
                                     <tr *ngIf="showHideRow(9)" class="bg-light">
                                         <td colspan="3"></td>
-                                        <td class="font-weight-bold">MAX Orders</td>
+                                        <td class="font-weight-bold">{{headerPlanSub}}</td>
                                         <td class="font-weight-bold">Rate</td>
                                         <td class="font-weight-bold">Fixed Monthly</td>
                                         <td colspan="2"></td>
@@ -1276,64 +1328,65 @@
                 <h6 class="font-weight-bold mt-2 text-center">One Time Fees</h6>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Communication Services</p>
-                    <input value="{{ 0 + getSum(oneTimeFeeData?.communicationServices) | currency:currency}}" 
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.communicationServices) | currency:currency}}"
                         class="form-control col-md-3 p-1 h-30" readonly>
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Integration Services</p>
-                    <input value="{{ 0 + getSum(oneTimeFeeData?.integrationServices) | currency:currency}}" 
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.integrationServices) | currency:currency}}"
                         class="form-control col-md-3 p-1 h-30" readonly>
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">TP & Document Activation</p>
-                    <input value="{{ 0 + getSum(oneTimeFeeData?.tpAndDocumentActivation) | currency:currency}}" 
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.tpAndDocumentActivation) | currency:currency}}"
                         class="form-control col-md-3 p-1 h-30" readonly>
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Admin & Document Activation</p>
-                    <input value="{{ 0 + getSum(oneTimeFeeData?.administrativeAndManagementServices) | currency:currency}}" 
+                    <input
+                        value="{{ 0 + getSum(oneTimeFeeData?.administrativeAndManagementServices) | currency:currency}}"
                         class="form-control col-md-3 p-1 h-30" readonly>
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Community Management</p>
-                    <input value="{{ 0 + getSum(oneTimeFeeData?.communityManagement) | currency:currency}}" 
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.communityManagement) | currency:currency}}"
                         class="form-control col-md-3 p-1 h-30" readonly>
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Project Management</p>
-                    <input value="{{ 0 + getSum(oneTimeFeeData?.projectManagement) | currency:currency}}" 
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.projectManagement) | currency:currency}}"
                         class="form-control col-md-3 p-1 h-30" readonly>
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Other</p>
-                    <input value="{{ 0 + getSum(oneTimeFeeData?.other) | currency:currency}}" readonly 
+                    <input value="{{ 0 + getSum(oneTimeFeeData?.other) | currency:currency}}" readonly
                         class="form-control col-md-3 p-1 h-30">
                 </div>
 
                 <h6 class="font-weight-bold mt-2 text-center">Recurring Fees</h6>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Monthly Support Service</p>
-                    <input value="{{ 0 + getSum(recurringFeeData?.monthlySupportService) | currency:currency}}" readonly 
+                    <input value="{{ 0 + getSum(recurringFeeData?.monthlySupportService) | currency:currency}}" readonly
                         class="form-control col-md-3 p-1 h-30">
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Volume Plan</p>
-                    <input value="{{ 0 + getSum(recurringFeeData?.volumePlan) | currency:currency}}"  readonly
+                    <input value="{{ 0 + getSum(recurringFeeData?.volumePlan) | currency:currency}}" readonly
                         class="form-control col-md-3 p-1 h-30">
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Service Bureau</p>
-                    <input value="{{ 0 + getSum(recurringFeeData?.serviceBureau) | currency:currency}}"  readonly
+                    <input value="{{ 0 + getSum(recurringFeeData?.serviceBureau) | currency:currency}}" readonly
                         class="form-control col-md-3 p-1 h-30">
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">NON-EDI formatted fees</p>
-                    <input value="{{ 0 + getSum(recurringFeeData?.nonEdiFormattedFees) | currency:currency}}"  readonly
+                    <input value="{{ 0 + getSum(recurringFeeData?.nonEdiFormattedFees) | currency:currency}}" readonly
                         class="form-control col-md-3 p-1 h-30">
                 </div>
                 <div class="row mb-1">
                     <p class="col-md-9 p-1 mb-0">Other</p>
-                    <input value="{{ 0 + getSum(recurringFeeData?.other) | currency:currency}}"  readonly
+                    <input value="{{ 0 + getSum(recurringFeeData?.other) | currency:currency}}" readonly
                         class="form-control col-md-3 p-1 h-30">
                 </div>
             </div>

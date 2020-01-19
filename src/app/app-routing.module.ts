@@ -20,6 +20,7 @@ import { PmFeesComponent } from './admin/tables/pm-fees/pm-fees.component';
 import { ServiceBureauFeesComponent } from './admin/tables/service-bureau-fees/service-bureau-fees.component';
 import { AdminUsersComponent } from './admin/admin-users/admin-users.component';
 import { ReportsComponent } from './admin/reports/reports.component';
+import { LogsComponent } from './admin/logs/logs.component';
 
 const routes: Routes = [
   {
@@ -49,6 +50,7 @@ const routes: Routes = [
       { path: 'servicebureaufees', component: ServiceBureauFeesComponent, pathMatch: 'full' },
       { path: 'users', component: AdminUsersComponent, pathMatch: 'full' },
       { path: 'reports', component: ReportsComponent, pathMatch: 'full' },
+      { path: 'logs', component: LogsComponent, pathMatch: 'full' },
     ]
   },
   { path: 'login', component: AdminLoginComponent },

@@ -5,7 +5,6 @@ import { FormControl, FormGroup, Validators, FormArray } from "@angular/forms";
 import { HomeService } from './service';
 import * as jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 
 export interface DialogData {
   email: string;
@@ -13,6 +12,7 @@ export interface DialogData {
   dealId: number;
   customerName: string;
   currency: string;
+  currencyData: [];
 }
 
 @Component({
@@ -156,6 +156,7 @@ export class HomeComponent implements OnInit {
   dealId: Number;
   customerName: string = "";
   currency: string = "USD";
+  previousCurrency = '';
   reportId = '';
   usdToinr = 70;
   usdTocad = 1.30;
@@ -165,10 +166,14 @@ export class HomeComponent implements OnInit {
   usdTogbp = 0.76;
   usdTovnd = 23173;
   convertedCurrency = 1;
+  currencyData = [];
+  headerPlan = "";
+  headerPlanSub = "";
+  version = 0;
 
   constructor(private messageService: MessageService,
     public dialog: MatDialog,
-    private service: HomeService
+    private service: HomeService,
   ) {
     this.service.getAllComplieanceFee()
       .subscribe(data => {
@@ -177,6 +182,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.getAllCC();
     this.getAllErp();
     this.getAllEdi();
     this.getAllMsKbPlans();
@@ -186,16 +192,17 @@ export class HomeComponent implements OnInit {
     this.getAllServiceBureauFees();
     this.getEcomFees();
     this.getPMFees();
-    this.openDialog();
+
     this.service.getOneTimeFeeData().then(data => this.oneTimeFeeData = data);
     this.service.getRecurringFeeData().then(data => this.recurringFeeData = data);
+
   }
 
   getAllErp() {
     this.service.getAllErp()
       .subscribe(data => {
         this.erpData = data;
-        this.addPrimaryIntegrationService(this.totalEdiDocs);
+        this.addPrimaryIntegrationService();
       });
   }
 
@@ -203,6 +210,14 @@ export class HomeComponent implements OnInit {
     this.service.getAllEdi()
       .subscribe(data => {
         this.ediData = data;
+      });
+  }
+
+  getAllCC() {
+    this.service.getAllCC()
+      .subscribe(data => {
+        this.currencyData = data;
+        this.openDialog();
       });
   }
 
@@ -255,29 +270,62 @@ export class HomeComponent implements OnInit {
       });
   }
 
-  currencyChange() {
-    if (this.currency == 'USD')
-      this.convertedCurrency = 1;
-    else if (this.currency == 'JPY')
-      this.convertedCurrency = this.usdTojpy;
-    else if (this.currency == 'CAD')
-      this.convertedCurrency = this.usdTocad;
-    else if (this.currency == 'AUD')
-      this.convertedCurrency = this.usdToaud;
-    else if (this.currency == 'EUR')
-      this.convertedCurrency = this.usdToeur;
-    else if (this.currency == 'GBP')
-      this.convertedCurrency = this.usdTogbp;
-    else if (this.currency == 'INR')
-      this.convertedCurrency = this.usdToinr;
-    else if (this.currency == 'VND')
-      this.convertedCurrency = this.usdTovnd;
+  currencyChange(e) {
+    let cc = this.currencyData.filter(a => a.Currency == this.currency);
+    let pc = this.currencyData.filter(a => a.Currency == (this.previousCurrency == '' ? this.currency : this.previousCurrency));
+    this.convertedCurrency = cc[0].ConvertionRate;
+
+    this.changeCalculation(this.oneTimeFeeData.communicationServices, pc[0].ConvertionRate);
+    this.changeCalculation(this.oneTimeFeeData.integrationServices, pc[0].ConvertionRate);
+    this.changeCalculation(this.oneTimeFeeData.tpAndDocumentActivation, pc[0].ConvertionRate);
+    this.changeCalculation(this.oneTimeFeeData.administrativeAndManagementServices, pc[0].ConvertionRate);
+    this.changeCalculation(this.oneTimeFeeData.communityManagement, pc[0].ConvertionRate);
+    this.changeCalculation(this.oneTimeFeeData.projectManagement, pc[0].ConvertionRate);
+    this.changeCalculation(this.oneTimeFeeData.other, pc[0].ConvertionRate);
+
+    this.changeCalculation(this.recurringFeeData.monthlySupportService, pc[0].ConvertionRate);
+    this.changeCalvolumePlan(pc[0].ConvertionRate);
+    this.changeCalculation(this.recurringFeeData.serviceBureau, pc[0].ConvertionRate);
+    this.changeCalnonEdiFormattedFees(pc[0].ConvertionRate);
+    this.changeCalculation(this.recurringFeeData.other, pc[0].ConvertionRate);
+    this.previousCurrency = this.currency;
+  }
+
+  changeCalculation(data, previousrate) {
+    data.forEach(e => {
+      e.unitPrice = (e.unitPrice / previousrate) * this.convertedCurrency;
+      e.price = (e.price / previousrate) * this.convertedCurrency;
+      e.afterDiscountPrice = (e.afterDiscountPrice / previousrate) * this.convertedCurrency;
+    });
+  }
+
+  changeCalvolumePlan(previousrate) {
+    this.recurringFeeData.volumePlan.forEach(e => {
+      if (e.id == 1 || e.id == 6 || e.id == 7) {
+        e.unitPrice = (e.unitPrice / previousrate) * this.convertedCurrency;
+        e.price = (e.price / previousrate) * this.convertedCurrency;
+        e.afterDiscountPrice = (e.afterDiscountPrice / previousrate) * this.convertedCurrency;
+      }
+    });
+  }
+
+  changeCalnonEdiFormattedFees(previousrate) {
+    this.recurringFeeData.nonEdiFormattedFees.forEach(e => {
+      if (e.item == "Monthly Support Plan") {
+        e.unitPrice = (e.unitPrice / previousrate) * this.convertedCurrency;
+        e.price = (e.price / previousrate) * this.convertedCurrency;
+        e.afterDiscountPrice = (e.afterDiscountPrice / previousrate) * this.convertedCurrency;
+      } else {
+        e.price = (e.price / previousrate) * this.convertedCurrency;
+        e.afterDiscountPrice = (e.afterDiscountPrice / previousrate) * this.convertedCurrency;
+      }
+    });
   }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: '500px',
-      data: { name: this.name, email: this.email, dealId: this.dealId, customerName: this.customerName, currency: this.currency },
+      data: { name: this.name, email: this.email, dealId: this.dealId, customerName: this.customerName, currency: this.currency, currencyData: this.currencyData },
       disableClose: true
     });
 
@@ -287,9 +335,19 @@ export class HomeComponent implements OnInit {
       this.dealId = result.dealId;
       this.customerName = result.customerName;
       this.currency = result.currency;
-      this.reportId = 'PC-' + this.dealId;
-      this.currencyChange();
+
+      this.service.getDealIdData(this.dealId.toString())
+        .subscribe(data => {
+          let d: any[] = data;
+          this.version = d.length + 1;
+          this.reportId = 'PC-' + this.dealId + '-V' + this.version;
+        });
+      this.currencyChange('');
     });
+  }
+
+  editPopup() {
+    this.openDialog();
   }
 
   getFee(index) {
@@ -361,12 +419,14 @@ export class HomeComponent implements OnInit {
         this.addNonEdiFormattedFees5();
       }
     } else if (id == 4) {
-      if (confirm("You cannot make modification after finalizing. Do you want to proceed?")) {
-        this.isTab1 = false;
-        this.isTab2 = false;
-        this.isTab3 = false;
-        this.isTab4 = true;
-        this.postUserData();
+      if (this.validatePricingTab()) {
+        if (confirm("You cannot make modification after finalizing. Do you want to proceed?")) {
+          this.isTab1 = false;
+          this.isTab2 = false;
+          this.isTab3 = false;
+          this.isTab4 = true;
+          this.postUserData();
+        }
       }
     } else {
       this.isTab1 = true;
@@ -374,6 +434,15 @@ export class HomeComponent implements OnInit {
       this.isTab3 = false;
       this.isTab4 = false;
     }
+    window.scrollTo(0, 0);
+  }
+
+  validatePricingTab() {
+    if (this.contractMonths == 0) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Contract Period can not be zero' });
+      return false;
+    } else
+      return true;
   }
 
   validateManagedServiceTab() {
@@ -398,15 +467,23 @@ export class HomeComponent implements OnInit {
     } else if (this.dsvpSelectedPlan == "" || !this.dsvpSelectedPlan) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Choose Annual Plan or Monthly Plan' });
       return false;
+    } else if (this.noElectronicallyIntegratedNonEdiTp > 0) {
+      if (this.totalEcommerce == 0) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Fill values in E-commerce matrix' });
+        return false;
+      } else
+        return true;
     } else {
       return true;
     }
+
   }
 
   postUserData() {
     this.totalContractValue = (this.contractMonths * this.getTotalRecurringFee(this.recurringFeeData)) + this.getTotalOneTimeFee(this.oneTimeFeeData);
     this.service.postUserData(this.name, this.email, this.dealId, this.customerName, this.currency, this.reportId, this.contractMonths, this.totalContractValue)
       .subscribe(data => {
+        this.postUserInputData(data.Id);
         this.postUserReportData(data.Id, "OneTime", "communicationServices", this.oneTimeFeeData.communicationServices);
         this.postUserReportData(data.Id, "OneTime", "integrationServices", this.oneTimeFeeData.integrationServices);
         this.postUserReportData(data.Id, "OneTime", "tpAndDocumentActivation", this.oneTimeFeeData.tpAndDocumentActivation);
@@ -420,6 +497,82 @@ export class HomeComponent implements OnInit {
         this.postUserReportData(data.Id, "Recurring", "serviceBureau", this.recurringFeeData.serviceBureau);
         this.postUserReportData(data.Id, "Recurring", "nonEdiFormattedFees", this.recurringFeeData.nonEdiFormattedFees);
         this.postUserReportData(data.Id, "Recurring", "other", this.recurringFeeData.other);
+      });
+  }
+
+  postUserInputData(id) {
+    this.totalContractValue = (this.contractMonths * this.getTotalRecurringFee(this.recurringFeeData)) + this.getTotalOneTimeFee(this.oneTimeFeeData);
+    let inputs = {
+      MERP: this.selectedErp,
+      MMsEcommerce: this.msEcommerece,
+      MBuySide: this.buySideCheck,
+      MSellSide: this.sellSideCheck,
+      MBuySideEdiSpecBookletTP: this.buySideCreateEdiSpecForBookletTp,
+      MBuySideComTestProgram: this.buySideImplementComplianceTestProgram,
+      MBuySideWhoPays: this.complianceTestWhoPays,
+      MBuySideNoTPComTest: this.noTPComplienceTested,
+      MBuySideProvideLabels: this.provideLabel,
+      MBuySideRetailerNeedLabels: this.noRetailerDivisionLabels,
+      MBuySideIsHubPaying: this.hubPayingForSupplier,
+      MBuySideIsPrivatePortal: this.isPrivatePortal,
+      MBuySideNoTPUsingPortal: this.noTPusingPortal,
+      MNoEdi: this.noEdiDocs,
+      MNoNonEdi: this.noNonEdiDocs,
+      MKBPlan: this.selectedKBPlan,
+      MSelectedKBPlan: this.selectedKBPlan == "MS KB Plan" ? this.selectedMSKBPlan : this.selectedDropShipVolumePlan,
+      MServicePlan: this.dsvpSelectedServicePlan,
+      MServicePlan1: this.dsvpSelectedProgram,
+      MServicePlan2: this.dsvpSelectedPlan,
+      MPrimaryInteration: this.selectedPrimaryIntegrationMethod,
+      MSecondaryIntegration: this.moreIntegrationMethodology ? this.selectedSecondaryIntegrationMethod : "",
+      MTPUsingEDIStandard: this.tpUsingOnlyEdiStandards,
+      MElectoicallyNonEdiTp: this.noElectronicallyIntegratedNonEdiTp,
+      MAdditionalServices: this.isClientNeedAdditionalSerices,
+      ADiPulse: this.diPulse,
+      ADiMetrics: this.diMetrics,
+      AServiceBureau: this.serviceBureau,
+      ACommunicationSoftware: this.communicationSoftware,
+      AOnsiteProfessionalServices: this.onsiteProfessionalServices,
+      ADiPulseNoAdditionalId: this.noDiPulseIdNeeded,
+      ADiMetricsBusinessRule: this.noBusinessRules,
+      ADiMetricsNoDocuments: this.noDocUsedInBusinessRules,
+      ADiMetricsHostCustomer: this.isDiMetricsHost,
+      ADiMetricsNoKBAssociated: this.noKBHostedEachMonth,
+      AServiceBureauHowManyDocs: this.noDocServiceBureauUsers,
+      AServiceBureauSponsorUsers: this.sponsorPayingServiceBureauUsers,
+      AServiceBureauUsersInProject: this.serviceBureauUsersInProject,
+      AServiceBureau850855865810DocsPerMonth: this.docsPerMonth,
+      AServiceBureau856DocsPerMonth: this.docs856PerMonth,
+      AServiceBureauLabelsPerMonth: this.labelsServiceBureauUsersPerMonth,
+      AServiceBureauLineItemsUsers: this.lineItemsPerMonth,
+      ACommunicationSoftwareForIntegration: this.identifyTheSwNo,
+      ACommunicationSoftwareProtocol: this.protocolConnectToDicenter,
+      AOnsiteProfessionalServicesHours: this.howManyHoursNeeded,
+    };
+
+    this.service.postUserInputData(id, this.name, this.email, this.dealId, this.customerName, this.currency, this.reportId, this.contractMonths, this.totalContractValue, inputs)
+      .subscribe(data => {
+        if (this.ediLoop.length > 0) {
+          this.ediLoop.forEach(e => {
+            this.service.postEdiDocsData(data.Id, e.ediDocs, e.noOfTP, e.integratedERPDiPulse)
+              .subscribe(data => {
+              });
+          });
+        }
+        if (this.nonEdiLoop.length > 0) {
+          this.nonEdiLoop.forEach(e => {
+            this.service.postNonEdiDocsData(data.Id, e.nonEdiDocs, e.noOfNonEdiTP)
+              .subscribe(data => {
+              });
+          });
+        }
+        if (this.ecommerceData.length > 0) {
+          this.ecommerceData.forEach(e => {
+            this.service.postEcommerceData(data.Id, e.name, e.orders, e.product, e.fullfilment, e.inventory, e.payment)
+              .subscribe(data => {
+              });
+          });
+        }
       });
   }
 
@@ -442,38 +595,40 @@ export class HomeComponent implements OnInit {
   downloadReport() {
     let doc = new jsPDF();
     let totalPagesExp = "{total_pages_count_string}";
-    let s = this.name + ' - ' + this.email + ' - ' + new Date().toLocaleString();
+    let str1 = 'User Name: ' + this.name + ' | ' + 'Email: ' + this.email + ' | ' + 'Date: ' + new Date().toLocaleString();
+    let str2 = 'Customer Name: ' + this.customerName + ' | ' + 'Deal Id: ' + this.dealId + ' | ' + 'Report Version: ' + this.reportId;
     doc.autoTable({
       html: '#finalReportId',
       tableWidth: 'auto',
       rowPageBreak: 'auto',
-      headStyles: { fillColor: [135, 206, 250] },
+      headStyles: { fillColor: [135, 206, 250], textColor: 0 },
       showHead: 'firstPage',
       showFoot: 'lastPage',
-      footStyles: { fillColor: [135, 206, 250] },
+      footStyles: { fillColor: [135, 206, 250], textColor: 0 },
       styles: { overflow: "linebreak", fontSize: "8", lineColor: "100", lineWidth: ".10" },
       columnStyles: {
         0: { columnWidth: 20 },
         1: { columnWidth: 30 },
         2: { columnWidth: 20 }
       },
-      margin: { top: 20 },
+      margin: { top: 25 },
       didDrawPage: function (data) {
         // Header
-        doc.setFontSize(18);
         doc.setTextColor(40);
         doc.setFontStyle('normal');
 
         doc.text("Price Calculation Report", data.settings.margin.left, 10);
         doc.setFontSize(12);
-        doc.text(s, data.settings.margin.left, 15);
+        doc.text(str1, data.settings.margin.left, 15);
+        doc.setFontSize(12);
+        doc.text(str2, data.settings.margin.left, 20);
         // Footer
         var str = "Page " + doc.internal.getNumberOfPages()
         // Total page number plugin only available in jspdf v1.0+
         if (typeof doc.putTotalPages === 'function') {
           str = str + " of " + totalPagesExp;
         }
-        doc.setFontSize(10);
+        doc.setFontSize(12);
 
         // jsPDF 1.4+ uses getWidth, <1.4 uses .width
         var pageSize = doc.internal.pageSize;
@@ -484,7 +639,6 @@ export class HomeComponent implements OnInit {
         if (data.row.cells[0].text[0] === 'Total:') {
           data.cell.styles.textColor = [237, 41, 57];
           data.cell.styles.halign = 'right';
-          //data.cell.styles.fontStyle = 'bold';
           data.cell.styles.fontSize = '10';
         } else {
           data.cell.styles.halign = 'left';
@@ -508,6 +662,11 @@ export class HomeComponent implements OnInit {
           data.cell.styles.halign = 'center';
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.fontSize = '12';
+        }
+        if (data.row.cells[0].text[0] === 'Item') {
+          data.cell.styles.textColor = [0, 0, 0];
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fillColor = [135, 206, 250];
         }
       }
     });
@@ -538,7 +697,24 @@ export class HomeComponent implements OnInit {
     } else if (index == 8) {
       return this.recurringFeeData != null ? this.recurringFeeData.monthlySupportService.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
     } else if (index == 9) {
-      return this.recurringFeeData != null ? this.recurringFeeData.volumePlan : [];
+      let a = [];
+      if (this.recurringFeeData != null) {
+        for (let i = 0; i < this.recurringFeeData.volumePlan.length; i++) {
+          if (i == 0 || i == 5 || i == 6) {
+            if (this.recurringFeeData.volumePlan[i].afterDiscountPrice != 0 && this.recurringFeeData.volumePlan[i].afterDiscountPrice != '')
+              a.push(this.recurringFeeData.volumePlan[i])
+          } else if (i == 1 || i == 2 || i == 4) {
+            if (this.recurringFeeData.volumePlan[i].quantity != 0 && this.recurringFeeData.volumePlan[i].quantity != '')
+              a.push(this.recurringFeeData.volumePlan[i])
+          } else if (i == 3) {
+            if (this.recurringFeeData.volumePlan[i].instructions != '')
+              a.push(this.recurringFeeData.volumePlan[i])
+          }
+          if (i == this.recurringFeeData.volumePlan.length - 1)
+            return a;
+        }
+      } else
+        return [];
     } else if (index == 10) {
       return this.recurringFeeData != null ? this.recurringFeeData.serviceBureau.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
     } else if (index == 11) {
@@ -574,8 +750,24 @@ export class HomeComponent implements OnInit {
       let d = this.recurringFeeData != null ? this.recurringFeeData.monthlySupportService.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
       return d.length > 0 ? true : false;
     } else if (index == 9) {
-      let d = this.recurringFeeData != null ? this.recurringFeeData.volumePlan : [];
-      return d.length > 0 ? true : false;
+      let a = [];
+      if (this.recurringFeeData != null) {
+        for (let i = 0; i < this.recurringFeeData.volumePlan.length; i++) {
+          if (i == 0 || i == 5 || i == 6) {
+            if (this.recurringFeeData.volumePlan[i].afterDiscountPrice != 0 && this.recurringFeeData.volumePlan[i].afterDiscountPrice != '')
+              a.push(this.recurringFeeData.volumePlan[i])
+          } else if (i == 1 || i == 2 || i == 4) {
+            if (this.recurringFeeData.volumePlan[i].quantity != 0 && this.recurringFeeData.volumePlan[i].quantity != '')
+              a.push(this.recurringFeeData.volumePlan[i])
+          } else if (i == 3) {
+            if (this.recurringFeeData.volumePlan[i].instructions != '')
+              a.push(this.recurringFeeData.volumePlan[i])
+          }
+          if (i == this.recurringFeeData.volumePlan.length - 1)
+            return a.length > 0 ? true : false;
+        }
+      } else
+        return false;
     } else if (index == 10) {
       let d = this.recurringFeeData != null ? this.recurringFeeData.serviceBureau.filter(a => a.afterDiscountPrice != 0 && a.afterDiscountPrice != '') : [];
       return d.length > 0 ? true : false;
@@ -612,8 +804,8 @@ export class HomeComponent implements OnInit {
   }
 
   changeErp(e) {
-    this.addPrimaryIntegrationService(this.totalEdiDocs);
-    this.addSecondaryIntegrationServices(this.totalEdiDocs);
+    this.addPrimaryIntegrationService();
+    this.addSecondaryIntegrationServices(this.noEdiDocs);
   }
 
   ediChange(e) {
@@ -635,6 +827,7 @@ export class HomeComponent implements OnInit {
 
       this.addMSPTradingCommunity(15, 0);
       this.addTradingPartnerEnable(0);
+      this.addTpAndDocument();
     } else {
       this.isEDI = false;
       this.addComplienceTestingPerTPperDocument('', 0, 0);
@@ -651,8 +844,8 @@ export class HomeComponent implements OnInit {
     this.totalEdiDocs = total;
     this.addMSPTradingCommunity(15, total);
     this.addTradingPartnerEnable(total);
-    this.addPrimaryIntegrationService(total);
-    this.addSecondaryIntegrationServices(this.totalEdiDocs);
+    this.addPrimaryIntegrationService();
+    this.addSecondaryIntegrationServices(this.noEdiDocs);
     this.addTpAndDocument();
     this.addProjectManagement();
   }
@@ -704,20 +897,40 @@ export class HomeComponent implements OnInit {
       this.sellSideCheck = true;
       this.oneTimeFeeCommunityManagement = [];
     }
-    this.addPrimaryIntegrationService(this.totalEdiDocs);
-    this.addSecondaryIntegrationServices(this.totalEdiDocs);
-
+    this.addPrimaryIntegrationService();
+    this.addSecondaryIntegrationServices(this.noEdiDocs);
+    this.addTpAndDocument();
   }
 
   sellSide(e) {
     if (e.checked) {
       this.buySideCheck = false;
+      this.buySideCreateEdiSpecForBookletTp = false;
+      this.buySideImplementComplianceTestProgram = false;
+      this.isCompliance = false;
+      this.complianceTestWhoPays = "Trading Partner (Paid)";
+      this.noTPComplienceTested = 0;
+      this.provideLabel = false;
+      this.noRetailerDivisionLabels = 0;
+      this.hubPayingForSupplier = false;
+      this.isPrivatePortal = false;
+      this.noTPusingPortal = 0;
+      this.isProvideLabel = false;
+      this.isHubPaying = false;
+      this.addComplienceTestingPerTPperDocument('', 0, 0);
+      this.addSetupComplianceTestSite('', 0, 0);
+      this.addTPEDIImplementationGuideCreation(0, 0);
+      this.addSetupSponsorPaidPortal(0, 0);
+      this.addTradingPartnerFeesSponsorPaidPortal(0, 0);
+      this.addVolumeForDiWeb('', 0, 0);
+      this.addCreateLabels(0, 0);
     } else {
       this.buySideCheck = true;
     }
     this.oneTimeFeeCommunityManagement = [];
-    this.addPrimaryIntegrationService(this.totalEdiDocs);
-    this.addSecondaryIntegrationServices(this.totalEdiDocs);
+    this.addPrimaryIntegrationService();
+    this.addSecondaryIntegrationServices(this.noEdiDocs);
+    this.addTpAndDocument();
   }
 
   changeComplianceTestWhoPays(pays) {
@@ -781,16 +994,21 @@ export class HomeComponent implements OnInit {
     if (e.value == "MS KB Plan") {
       this.isMsKbPlan = true;
       this.isDropShipVolumePlan = false;
+      this.headerPlan = "KB Plan";
+      this.headerPlanSub = "MAX Kb's";
     }
     else if (e.value == "Drop Ship Volume Plan") {
       this.isMsKbPlan = false;
       this.isDropShipVolumePlan = true;
       this.dsvpChange('');
+      this.headerPlan = "Volume Plan";
+      this.headerPlanSub = "MAX Orders"
     } else {
       this.isMsKbPlan = false;
       this.isDropShipVolumePlan = false;
     }
     this.isAdditionalPlanDetails = true;
+
   }
 
   complianceTest(e) {
@@ -842,13 +1060,13 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  //Recurring Fees - Volume Plan - Volume for DiWeb - 5 - array 4
-  addVolumeForDiWeb(instruction, unitPrice, qty) {
-    this.recurringFeeData.volumePlan[4].instruction = instruction;
-    this.recurringFeeData.volumePlan[4].unitPrice = unitPrice * this.convertedCurrency;
-    this.recurringFeeData.volumePlan[4].quantity = qty;
-    this.recurringFeeData.volumePlan[4].price = unitPrice * qty * this.convertedCurrency;
-    this.recurringFeeData.volumePlan[4].afterDiscountPrice = unitPrice * qty * this.convertedCurrency;
+  //Recurring Fees - Volume Plan - Volume for DiWeb - 7 - array 6
+  addVolumeForDiWeb(instructions, unitPrice, qty) {
+    this.recurringFeeData.volumePlan[6].instructions = instructions;
+    this.recurringFeeData.volumePlan[6].unitPrice = unitPrice * this.convertedCurrency;
+    this.recurringFeeData.volumePlan[6].quantity = qty;
+    this.recurringFeeData.volumePlan[6].price = unitPrice * qty * this.convertedCurrency;
+    this.recurringFeeData.volumePlan[6].afterDiscountPrice = unitPrice * qty * this.convertedCurrency;
   }
 
   privatePortal(e) {
@@ -891,7 +1109,7 @@ export class HomeComponent implements OnInit {
   integrationMethodology(e) {
     if (e.checked) {
       this.isIntegrationMethodology = true;
-      this.addSecondaryIntegrationServices(this.totalEdiDocs);
+      this.addSecondaryIntegrationServices(this.noEdiDocs);
     }
     else {
       this.isIntegrationMethodology = false;
@@ -922,13 +1140,13 @@ export class HomeComponent implements OnInit {
   changePrimaryMethod(primary) {
     this.selectedPrimaryIntegrationMethod = primary;
     this.checkIntegrationMethod();
-    this.addPrimaryIntegrationService(this.totalEdiDocs);
+    this.addPrimaryIntegrationService();
   }
 
   changeSecondaryMethod(secondary) {
     this.selectedSecondaryIntegrationMethod = secondary;
     this.checkIntegrationMethod();
-    this.addSecondaryIntegrationServices(this.totalEdiDocs);
+    this.addSecondaryIntegrationServices(this.noEdiDocs);
   }
 
   checkIntegrationMethod() {
@@ -1009,15 +1227,15 @@ export class HomeComponent implements OnInit {
         fixedFee = 0;
       }
 
-      let instruction;
+      let instructions;
       if (this.dsvpSelectedProgram == "Standard Replenishment" && this.dsvpSelectedPlan == "Annual Plan")
-        instruction = "Overage when annual KB exceeded";
+        instructions = "Overage when annual KB exceeded";
       else if (this.dsvpSelectedProgram != "Standard Replenishment" && this.dsvpSelectedPlan == "Annual Plan")
-        instruction = "Overage when annual Orders exceeded";
+        instructions = "Overage when annual Orders exceeded";
       else if (this.dsvpSelectedProgram == "Standard Replenishment" && this.dsvpSelectedPlan == "Monthly Plan")
-        instruction = "Overage when monthly KB exceeded";
+        instructions = "Overage when monthly KB exceeded";
       else if (this.dsvpSelectedProgram != "Standard Replenishment" && this.dsvpSelectedPlan == "Monthly Plan")
-        instruction = "Overage when monthly Orders exceeded";
+        instructions = "Overage when monthly Orders exceeded";
 
       let fixedRate;
       if (deliverable == "Measured in Kilo Bytes" && this.dsvpSelectedPlan == "Monthly Plan") {
@@ -1037,7 +1255,7 @@ export class HomeComponent implements OnInit {
       }
 
       this.addDropShipPlanRecurringFee1(deliverable, maxKB, fixedFee);
-      this.addDropShipPlanRecurringFee2(deliverable, instruction, fixedRate);
+      this.addDropShipPlanRecurringFee2(deliverable, instructions, fixedRate);
       if (this.dsvpSelectedProgram != "Standard Replenishment") {
         this.addDropShipPlanRecurringFee3("No Fee");
         this.addTransactionFees2(this.recurringFeeData.volumePlan[0].quantity == 0 ? 0 : 0.01);
@@ -1051,7 +1269,7 @@ export class HomeComponent implements OnInit {
         this.addTransactionFees5(0, 0);
       }
       if (this.oneTimeFeeData.other[3].oneTimeDeliverable != "") {
-        this.addNonEdiFormattedFees(this.recurringFeeData.monthlySupportService[0].instruction,
+        this.addNonEdiFormattedFees(this.recurringFeeData.monthlySupportService[0].instructions,
           this.recurringFeeData.monthlySupportService[0].unitPrice,
           this.oneTimeFeeData.other[3].price)
       }
@@ -1068,9 +1286,9 @@ export class HomeComponent implements OnInit {
   }
 
   //Recurring Fees - Volume Plan - 2 - array 1
-  addDropShipPlanRecurringFee2(deliverable, instruction, fixedRate) {
+  addDropShipPlanRecurringFee2(deliverable, instructions, fixedRate) {
     this.recurringFeeData.volumePlan[1].monthlyRecurringDeliverable = deliverable;
-    this.recurringFeeData.volumePlan[1].instruction = instruction;
+    this.recurringFeeData.volumePlan[1].instructions = instructions;
     this.recurringFeeData.volumePlan[1].quantity = fixedRate;
   }
 
@@ -1091,22 +1309,28 @@ export class HomeComponent implements OnInit {
   }
 
   //Recurring Fees - Volume Plan - 	855/ORDRSP, 810/INVOIC and 856/DESADV - 4 - array 3
-  addDropShipPlanRecurringFee3(instruction) {
-    this.recurringFeeData.volumePlan[3].instruction = instruction;
+  addDropShipPlanRecurringFee3(instructions) {
+    this.recurringFeeData.volumePlan[3].instructions = instructions;
   }
 
   //Recurring Fees - NON EDI Formatted Fees - Integration Service NON-EDI - 1 - array 0
-  addNonEdiFormattedFees(instruction, unitPrice, price) {
-    this.recurringFeeData.nonEdiFormattedFees[0].instructions = instruction;
+  addNonEdiFormattedFees(instructions, unitPrice, price) {
+    this.recurringFeeData.nonEdiFormattedFees[0].instructions = instructions;
     this.recurringFeeData.nonEdiFormattedFees[0].unitPrice = unitPrice * this.convertedCurrency;
     this.recurringFeeData.nonEdiFormattedFees[0].price = price * this.convertedCurrency;
     this.recurringFeeData.nonEdiFormattedFees[0].afterDiscountPrice = price * this.convertedCurrency;
   }
 
-  addPrimaryIntegrationService(total) {
+  addPrimaryIntegrationService() {
+    let tp = 0;
+    this.ediLoop.forEach(e => {
+      if (e.integratedERPDiPulse == "Outbound from Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
+        tp += e.noOfTP;
+      }
+    });
     let type = this.selectedPrimaryIntegrationMethod + ' ' + (this.buySideCheck == true ? "Buy Side" : "Sell Side");
     let erp = this.erpData.filter(a => a.Name == this.selectedErp && a.Type.toString().indexOf(type.toString()) !== -1);
-    let qty = erp[0].Methodology.toString().indexOf('Per Document Fee') == -1 ? 1 : total;
+    let qty = erp[0].Methodology.toString().indexOf('Per Document Fee') == -1 ? 1 : tp;
     this.addIntegrationService(this.selectedPrimaryIntegrationMethod, type, this.selectedErp, erp[0].Amount, qty, erp[0].Amount * qty)
   }
 
@@ -1122,8 +1346,9 @@ export class HomeComponent implements OnInit {
   }
 
   changeServicePlan(e) {
-    if (this.dsvpSelectedServicePlan != '') {
-      let instruction = this.dsvpSelectedServicePlan + ' Support';
+    if (e != "") {
+      this.dsvpSelectedServicePlan = e;
+      let instructions = this.dsvpSelectedServicePlan + ' Support';
       let up;
       if (this.dsvpSelectedServicePlan == "Standard")
         up = 1.7;
@@ -1133,46 +1358,44 @@ export class HomeComponent implements OnInit {
         up = 3.3;
 
       let price = ((this.oneTimeFeeData.integrationServices[0].price + this.oneTimeFeeData.integrationServices[1].price) * up) / 100;
-      this.addMSPIntegrationService(instruction, up, price);
+      this.addMSPIntegrationService(instructions, up, price);
 
       let price1 = ((this.oneTimeFeeData.communityManagement[0].price + this.oneTimeFeeData.communityManagement[5].price) * up) / 100;
-      this.addMSPCommunityManagement(instruction, up, price1);
+      this.addMSPCommunityManagement(instructions, up, price1);
+
+      let price2 = ((this.oneTimeFeeData.communicationServices[0].price + this.oneTimeFeeData.communicationServices[1].price) * up) / 100;
+      this.addMSPCommunicationsServices(instructions, up, price2);
+    } else {
+      this.addMSPIntegrationService('', 0, 0);
+      this.addMSPCommunityManagement('', 0, 0);
+      this.addMSPCommunicationsServices('', 0, 0);
     }
   }
 
   //Recurring Fees - Monthly Support Service - Communications Services - 1 - array 0
-  addMonthlySupportService(){
-    if (this.dsvpSelectedServicePlan != '') {
-      let instruction = this.dsvpSelectedServicePlan + ' Support';
-      let up;
-      if (this.dsvpSelectedServicePlan == "Standard")
-        up = 1.7;
-      else if (this.dsvpSelectedServicePlan == "Advanced")
-        up = 2.5;
-      else if (this.dsvpSelectedServicePlan == "Premium")
-        up = 3.3;
-
-      let price = ((this.oneTimeFeeData.communicationServices[0].price + this.oneTimeFeeData.communicationServices[1].price) * up) / 100;
-      this.addMSPIntegrationService(instruction, up, price);
-
-      let price1 = ((this.oneTimeFeeData.communityManagement[0].price + this.oneTimeFeeData.communityManagement[5].price) * up) / 100;
-      this.addMSPCommunityManagement(instruction, up, price1);
-    }
+  addMSPCommunicationsServices(instructions, unitPrice, price) {
+    this.recurringFeeData.monthlySupportService[0].instructions = instructions;
+    this.recurringFeeData.monthlySupportService[0].unitPrice = unitPrice * this.convertedCurrency;
+    this.recurringFeeData.monthlySupportService[0].price = price * this.convertedCurrency;
+    this.recurringFeeData.monthlySupportService[0].quantity = "";
+    this.recurringFeeData.monthlySupportService[0].afterDiscountPrice = price * this.convertedCurrency;
   }
 
   //Recurring Fees - Monthly Support Service - Integration Service - 2 - array 1
-  addMSPIntegrationService(instruction, unitPrice, price) {
-    this.recurringFeeData.monthlySupportService[1].instruction = instruction;
+  addMSPIntegrationService(instructions, unitPrice, price) {
+    this.recurringFeeData.monthlySupportService[1].instructions = instructions;
     this.recurringFeeData.monthlySupportService[1].unitPrice = unitPrice * this.convertedCurrency;
     this.recurringFeeData.monthlySupportService[1].price = price * this.convertedCurrency;
+    this.recurringFeeData.monthlySupportService[1].quantity = "";
     this.recurringFeeData.monthlySupportService[1].afterDiscountPrice = price * this.convertedCurrency;
   }
 
   //Recurring Fees - Monthly Support Service - Community management - 3 - array 2
-  addMSPCommunityManagement(instruction, unitPrice, price) {
-    this.recurringFeeData.monthlySupportService[2].instruction = instruction;
+  addMSPCommunityManagement(instructions, unitPrice, price) {
+    this.recurringFeeData.monthlySupportService[2].instructions = instructions;
     this.recurringFeeData.monthlySupportService[2].unitPrice = unitPrice * this.convertedCurrency;
     this.recurringFeeData.monthlySupportService[2].price = price * this.convertedCurrency;
+    this.recurringFeeData.monthlySupportService[2].quantity = "";
     this.recurringFeeData.monthlySupportService[2].afterDiscountPrice = price * this.convertedCurrency;
   }
 
@@ -1202,11 +1425,10 @@ export class HomeComponent implements OnInit {
     let type = this.buySideCheck == true ? "Buy Side - per document (all TP's)" : "Sell Side - per document per TP";
     let erp = this.erpData.filter(a => a.Name == this.selectedErp && a.Type.toString().indexOf(type.toString()) !== -1);
     let qty;
-    if (type == "Buy Side - per document (all TPs)")
+    if (type == "Buy Side - per document (all TP's)")
       qty = this.noEdiDocs;
     else
       qty = this.totalEdiDocs + this.totalEcommerce;
-
     this.addTPAndDocumentService("TP and Documents", type, this.selectedErp, erp[0].Amount, qty);
   }
 
@@ -1502,9 +1724,7 @@ export class HomeComponent implements OnInit {
     ];
     this.service.getOneTimeFeeData().then(data => this.oneTimeFeeData = data);
     this.service.getRecurringFeeData().then(data => this.recurringFeeData = data);
-    this.addPrimaryIntegrationService(this.totalEdiDocs);
-    this.dealId = 0;
-    this.customerName = '';
+    this.addPrimaryIntegrationService();
   }
 
   addServices(e, index) {
@@ -1582,6 +1802,7 @@ export class HomeComponent implements OnInit {
     this.additionServiceTab5 = true;
     this.howManyHoursNeeded = 0;
     this.addDiCentralHours(0, 0);
+    this.contractMonths = 0;
   }
 
   //One Time Fees - Administrative and Management Services - DiPulse Master - 1 - array 0
@@ -1665,13 +1886,13 @@ export class HomeComponent implements OnInit {
       for (let i = 0; i < fee.length; i++) {
         if (this.totalEdiDocs <= fee[i].TradingPartnerCommunitySize) {
           up = fee[i].Fee;
+          this.recurringFeeData.monthlySupportService[3].unitPrice = up * this.convertedCurrency;
+          this.recurringFeeData.monthlySupportService[3].price = up * this.convertedCurrency;
+          this.recurringFeeData.monthlySupportService[3].quantity = 1;
+          this.recurringFeeData.monthlySupportService[3].afterDiscountPrice = up * this.convertedCurrency;
           break;
         }
       }
-
-      this.recurringFeeData.monthlySupportService[4].unitPrice = up * this.convertedCurrency;
-      this.recurringFeeData.monthlySupportService[4].price = up * this.convertedCurrency;
-      this.recurringFeeData.monthlySupportService[4].afterDiscountPrice = up * this.convertedCurrency;
     }
   }
 
@@ -1784,11 +2005,11 @@ export class HomeComponent implements OnInit {
     for (let i = 0; i < doc.length; i++) {
       if (this.docsPerMonth >= doc[i].Min && this.docsPerMonth <= doc[i].Max) {
         up = doc[i].Fee;
+        let qty = this.docsPerMonth + this.serviceBureauUsersInProject;
+        this.editServiceBureauDocs1(up, qty)
         break;
       }
     }
-    let qty = this.docsPerMonth + this.serviceBureauUsersInProject;
-    this.editServiceBureauDocs1(up, qty)
   }
 
   editServiceBureauDocs1(unitPrice, qty) {
@@ -1816,11 +2037,11 @@ export class HomeComponent implements OnInit {
     for (let i = 0; i < doc.length; i++) {
       if (this.docs856PerMonth >= doc[i].Min && this.docs856PerMonth <= doc[i].Max) {
         up = doc[i].Fee;
+        let qty = this.docs856PerMonth + this.serviceBureauUsersInProject;
+        this.editServiceBureauDocs2(up, qty)
         break;
       }
     }
-    let qty = this.docs856PerMonth + this.serviceBureauUsersInProject;
-    this.editServiceBureauDocs2(up, qty)
   }
 
   editServiceBureauDocs2(unitPrice, qty) {
@@ -1848,11 +2069,12 @@ export class HomeComponent implements OnInit {
     for (let i = 0; i < doc.length; i++) {
       if (this.lineItemsPerMonth >= doc[i].Min && this.lineItemsPerMonth <= doc[i].Max) {
         up = doc[i].Fee;
+        let qty = this.lineItemsPerMonth;
+        this.editServiceBureauDocs3(up, qty);
         break;
       }
     }
-    let qty = this.lineItemsPerMonth;
-    this.editServiceBureauDocs3(up, qty)
+
   }
 
   editServiceBureauDocs3(unitPrice, qty) {
@@ -1880,11 +2102,11 @@ export class HomeComponent implements OnInit {
     for (let i = 0; i < doc.length; i++) {
       if (this.labelsServiceBureauUsersPerMonth >= doc[i].Min && this.labelsServiceBureauUsersPerMonth <= doc[i].Max) {
         up = doc[i].Fee;
+        let qty = this.labelsServiceBureauUsersPerMonth;
+        this.editServiceBureauDocs4(up, qty);
         break;
       }
     }
-    let qty = this.labelsServiceBureauUsersPerMonth;
-    this.editServiceBureauDocs4(up, qty)
   }
 
   editServiceBureauDocs4(unitPrice, qty) {
@@ -2067,6 +2289,13 @@ export class HomeComponent implements OnInit {
       this.recurringFeeData.other[index].discount = 0;
     }
   }
+
+  newReport() {
+    if (confirm("Are you sure you want to create new report that leads to clear all fields values?")) {
+      this.clearManagedServiceInputes();
+      this.hideShowTab(1);
+    }
+  }
 }
 
 @Component({
@@ -2086,7 +2315,13 @@ export class DialogOverviewExampleDialog {
   });
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData) { }
+    @Inject(MAT_DIALOG_DATA) public data: DialogData) {
+    this.form.controls['userName'].setValue(this.data.name);
+    this.form.controls['email'].setValue(this.data.email);
+    this.form.controls['dealId'].setValue(this.data.dealId);
+    this.form.controls['customerName'].setValue(this.data.customerName);
+    this.form.controls['currency'].setValue(this.data.currency);
+  }
 
   onNoClick(): void {
     this.dialogRef.close(this.data);

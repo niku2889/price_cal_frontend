@@ -6,7 +6,7 @@
             "oneTimeDeliverable": "",
             "erp": "",
             "unitPrice": 0,
-            "quantity": 0,
+            "quantity": null,
             "price": 0,
             "discount": 0,
             "afterDiscountPrice": 0
@@ -67,7 +67,7 @@
             "oneTimeDeliverable": "Includes connection to DiWeb",
             "erp": "",
             "unitPrice": 0,
-            "quantity": 0,
+            "quantity": null,
             "price": 0,
             "discount": 0,
             "afterDiscountPrice": 0

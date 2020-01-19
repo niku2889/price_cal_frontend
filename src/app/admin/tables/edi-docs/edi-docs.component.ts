@@ -48,6 +48,9 @@ export class EdiDocsComponent implements OnInit {
           this.ediDocs = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
+          this.service.addLogs('EdiDocs', this.selectedEdiDocs.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -81,6 +84,9 @@ export class EdiDocsComponent implements OnInit {
         .subscribe(data1 => {
           this.ediDocsData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
+          this.service.addLogs('EdiDocs', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -90,6 +96,9 @@ export class EdiDocsComponent implements OnInit {
         .subscribe(data1 => {
           erps[this.ediDocsData.indexOf(this.selectedEdiDocs)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
+          this.service.addLogs('EdiDocs', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });

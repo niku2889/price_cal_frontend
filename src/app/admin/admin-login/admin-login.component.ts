@@ -35,6 +35,7 @@ export class AdminLoginComponent implements OnInit {
           let l = loginResult.filter(a => a.Name == signinData.username && a.Password == signinData.password)
           if (l.length > 0) {
             localStorage.setItem('login', 'true');
+            localStorage.setItem('userId', l[0].Id);
             localStorage.setItem('superAdmin', l[0].IsSuperAdmin);
             localStorage.setItem('name', l[0].Name);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Logged in successfully!' });

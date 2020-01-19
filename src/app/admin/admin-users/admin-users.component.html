@@ -1,5 +1,5 @@
 <p-toast [style]="{marginTop: '120px'}"></p-toast>
-<div class="container">
+<div *ngIf="permission" class="container">
     <div class="card mt-3">
         <div class="card-header">
             <h5>ADMIN USERS</h5>
@@ -40,7 +40,7 @@
         </div>
     </div>
     <p-dialog header="Plan Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
-        showEffect="fade" [modal]="true" [style]="{width: '600px'}">
+        showEffect="fade" [modal]="true" [style]="{width: '600px'}" [autoZIndex]="false">
         <div class="ui-g ui-fluid" *ngIf="plan">
             <div class="ui-g-12 p-0">
                 <div class="ui-g-6">
@@ -70,4 +70,10 @@
             </div>
         </p-footer>
     </p-dialog>
+</div>
+
+<div *ngIf="!permission" class="container">
+    <div class="alert alert-danger m-5">
+        You do not have sufficient permissions to view this page.
+    </div>
 </div>

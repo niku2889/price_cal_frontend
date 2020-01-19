@@ -1023,4 +1023,86 @@ export class AdminService {
                     });
         });
     }
+
+    getAllLogs() {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'Logs')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    addLogs(tableName, rowid, userName, userId, action) {
+        const body1 = JSON.stringify({
+            "TableName": tableName,
+            "RowId": rowid,
+            "Date": new Date(),
+            "UserName": userName,
+            "UserId": userId,
+            "OperationType": action
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'Logs', body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
+    getEdiDetails(id) {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'UserInputesEdis/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getNonEdiDetails(id) {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'UserInputesNonEdis/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getEcommerceDetails(id) {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'UserInputesEcommerces/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getInputDetails(id) {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'UserInputes/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
 }

@@ -58,6 +58,9 @@ export class ServiceBureauFeesComponent implements OnInit {
           this.plan = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
+          this.service.addLogs('ServiceBureauFees', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -91,6 +94,9 @@ export class ServiceBureauFeesComponent implements OnInit {
         .subscribe(data1 => {
           this.planData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
+          this.service.addLogs('ServiceBureauFees', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -100,6 +106,9 @@ export class ServiceBureauFeesComponent implements OnInit {
         .subscribe(data1 => {
           erps[this.planData.indexOf(this.selectedPlan)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
+          this.service.addLogs('ServiceBureauFees', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update')
+          .subscribe(l => {
+          });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
