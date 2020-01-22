@@ -1,10 +1,14 @@
-import { Component, OnInit, ViewEncapsulation, Inject } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, Inject, ViewChild, ElementRef } from '@angular/core';
 import { MenuItem, MessageService } from 'primeng/api';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormControl, FormGroup, Validators, FormArray } from "@angular/forms";
 import { HomeService } from './service';
 import * as jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
+const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+const EXCEL_EXTENSION = '.xlsx';
 
 export interface DialogData {
   email: string;
@@ -23,6 +27,7 @@ export interface DialogData {
 
 })
 export class HomeComponent implements OnInit {
+  @ViewChild('finalReportId', { static: false }) table: ElementRef;
   email: string;
   name: string;
 
@@ -103,6 +108,7 @@ export class HomeComponent implements OnInit {
   noTPusingPortal = 0;
   noEdiDocs = 0;
   noNonEdiDocs = 0;
+  noTPInScope = 0;
   selectedKBPlan: string;
   selectedMSKBPlan = "1";
   selectedDropShipVolumePlan = "1";
@@ -115,6 +121,7 @@ export class HomeComponent implements OnInit {
   tpUsingOnlyEdiStandards = true;
   noElectronicallyIntegratedNonEdiTp = 0;
   isClientNeedAdditionalSerices = false;
+  maxEDITpNo = 0;
   //form fields end
 
   //Additional Service Input fields start
@@ -360,25 +367,22 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  // exportExcel() {
-  //   import("xlsx").then(xlsx => {
-  //     const worksheet = xlsx.utils.sheet_to_html(this.getCars());
-  //     const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
-  //     const excelBuffer: any = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-  //     this.saveAsExcelFile(excelBuffer, "primengTable");
-  //   });
-  // }
+  exportExcel() {
+    let d = [];
+    d.push(this.oneTimeFeeData);
+    d.push(this.recurringFeeData);
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(this.table.nativeElement, { raw: true });
+    const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    this.saveAsExcelFile(excelBuffer, "Pricing Report");
+  }
 
-  // saveAsExcelFile(buffer: any, fileName: string): void {
-  //   import("file-saver").then(FileSaver => {
-  //     let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-  //     let EXCEL_EXTENSION = '.xlsx';
-  //     const data: Blob = new Blob([buffer], {
-  //       type: EXCEL_TYPE
-  //     });
-  //     FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
-  //   });
-  // }
+  saveAsExcelFile(buffer: any, fileName: string): void {
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE
+    });
+    FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+  }
 
   additionalService(e) {
     if (this.validateManagedServiceTab()) {
@@ -408,7 +412,7 @@ export class HomeComponent implements OnInit {
         this.isAdditionalService = true;
       }
     } else if (id == 3) {
-      if (this.validateManagedServiceTab()) {
+      if (this.validateManagedServiceTab() && this.validatePricingTab()) {
         this.isTab1 = false;
         this.isTab2 = false;
         this.isTab3 = true;
@@ -419,14 +423,12 @@ export class HomeComponent implements OnInit {
         this.addNonEdiFormattedFees5();
       }
     } else if (id == 4) {
-      if (this.validatePricingTab()) {
-        if (confirm("You cannot make modification after finalizing. Do you want to proceed?")) {
-          this.isTab1 = false;
-          this.isTab2 = false;
-          this.isTab3 = false;
-          this.isTab4 = true;
-          this.postUserData();
-        }
+      if (confirm("You cannot make modification after finalizing. Do you want to proceed?")) {
+        this.isTab1 = false;
+        this.isTab2 = false;
+        this.isTab3 = false;
+        this.isTab4 = true;
+        this.postUserData();
       }
     } else {
       this.isTab1 = true;
@@ -438,22 +440,81 @@ export class HomeComponent implements OnInit {
   }
 
   validatePricingTab() {
-    if (this.contractMonths == 0) {
-      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Contract Period can not be zero' });
-      return false;
+    // if (this.contractMonths == 0) {
+    //   this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Contract Period can not be zero' });
+    //   return false;
+    // } else
+    console.log(this.isClientNeedAdditionalSerices)
+    if (this.isClientNeedAdditionalSerices) {
+      if (this.noBusinessRules == 0 && this.diMetrics) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'A Business Rule is needed' });
+        return false;
+      } else if (this.noBusinessRules > 26 && this.diMetrics) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'A Business Rule should not be greater than 26' });
+        return false;
+      } else if (this.noDocUsedInBusinessRules > this.totalEdiDocs && this.diMetrics) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'ERROR TOO many Documents' });
+        return false;
+      } else if (this.noDocUsedInBusinessRules > 10 && this.diMetrics) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents used in Business Rule should not be greater than 10' });
+        return false;
+      } else if (this.noKBHostedEachMonth > 10000 && this.diMetrics) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of KB hosted each month should not be greater than 10000' });
+        return false;
+      } else if (this.noDocServiceBureauUsers == 0 && this.serviceBureau) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'ERROR- Need Document Count for Service Bureau' });
+        return false;
+      } else if (this.docsPerMonth >= 4000 && this.serviceBureau) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents (850, 855, 865, 810) per month should not be greater than 3999' });
+        return false;
+      } else if (this.docs856PerMonth >= 4000 && this.serviceBureau) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents (856) per month should not be greater than 3999' });
+        return false;
+      } else if (this.lineItemsPerMonth >= 4000 && this.serviceBureau) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Monthly Line Items for all Users should not be greater than 3999' });
+        return false;
+      } else if (this.labelsServiceBureauUsersPerMonth >= 4000 && this.serviceBureau) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Labels are the Service Bureau users planning per month should not be greater than 3999' });
+        return false;
+      } else
+        return true;
     } else
       return true;
   }
 
   validateManagedServiceTab() {
+    if (this.ediLoop.length > 0) {
+      let loop = this.ediLoop;
+      this.maxEDITpNo = loop.sort((a, b) => a.noOfTP - b.noOfTP).reverse()[0].noOfTP;
+    }
+    let valid;
+    if (this.selectedSecondaryIntegrationMethod == "Embedded Adapter" || this.selectedPrimaryIntegrationMethod == "Embedded Adapter") {
+      let type = this.selectedSecondaryIntegrationMethod + ' ' + (this.buySideCheck ? "Buy Side" : "Sell Side");
+      let erp = this.erpData.filter(a => a.Name == this.selectedErp && a.Type.toString().indexOf(type.toString()) !== -1);
+      valid = erp.length > 0 ? (erp[0].Valid == 1 ? true : false) : false;
+    } else
+      valid = true;
+
     if (this.dealId == 0 || !this.dealId) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Deal ID is require' });
       return false;
     } else if (this.customerName == '') {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Customer Name is require' });
       return false;
+    } else if (this.noTPComplienceTested > 1500) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners is the sponsor paying to have compliance tested cannot be more than 1500, Contact your manager for special pricing' });
+      return false;
+    } else if (this.noRetailerDivisionLabels > 1500) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of retailer divisions need labels cannot be more than 1500, Contact your manager for special pricing' });
+      return false;
+    } else if (this.noTPusingPortal > 2000) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners using the Portal cannot be more than 2000, Contact your manager for special pricing' });
+      return false;
     } else if (this.noEdiDocs == 0 && this.noNonEdiDocs == 0) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Number of Documents on Scope is require' });
+      return false;
+    } else if (this.noTPInScope < this.maxEDITpNo) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Enter a number equal or higher than the max of the tps per doc' });
       return false;
     } else if (this.selectedKBPlan == "" || !this.selectedKBPlan) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Choose min no. of KB' });
@@ -467,12 +528,21 @@ export class HomeComponent implements OnInit {
     } else if (this.dsvpSelectedPlan == "" || !this.dsvpSelectedPlan) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Choose Annual Plan or Monthly Plan' });
       return false;
+    } else if (this.selectedSecondaryIntegrationMethod == this.selectedPrimaryIntegrationMethod) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Secondary integration method can not be same as primary integration method' });
+      return false;
+    } else if (!valid) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Embedded Adapter does not exist for this ERP' });
+      return false;
     } else if (this.noElectronicallyIntegratedNonEdiTp > 0) {
       if (this.totalEcommerce == 0) {
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Fill values in E-commerce matrix' });
         return false;
       } else
         return true;
+    } else if (this.contractMonths == null) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Contract Period required' });
+      return false;
     } else {
       return true;
     }
@@ -814,24 +884,24 @@ export class HomeComponent implements OnInit {
       let ediModel = {
         ediDocs: 128,
         noOfTP: 0,
-        integratedERPDiPulse: ''
+        integratedERPDiPulse: 'Inbound from Trading Partner'
       }
       this.ediLoop.push(ediModel)
     }
     if (this.noEdiDocs > 0) {
       this.isEDI = true;
-      this.addTPEDIImplementationGuideCreation(5000, this.noEdiDocs);
+      if (this.buySideCreateEdiSpecForBookletTp)
+        this.addTPEDIImplementationGuideCreation(5000, this.noEdiDocs);
+
       let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs + this.noTPComplienceTested);
       let fd = this.complieanceFeeData.filter(a => a.Name == "Compliance Testing per TP per document" && a.Scope == this.complianceTestWhoPays);
       this.addComplienceTestingPerTPperDocument(this.complianceTestWhoPays, fd[0].Fee, qty)
 
-      this.addMSPTradingCommunity(15, 0);
-      this.addTradingPartnerEnable(0);
+     
       this.addTpAndDocument();
     } else {
       this.isEDI = false;
       this.addComplienceTestingPerTPperDocument('', 0, 0);
-      this.addMSPTradingCommunity(0, 0);
     }
     //this.isNonEDI = false;
   }
@@ -842,8 +912,7 @@ export class HomeComponent implements OnInit {
       total += element.noOfTP;
     });
     this.totalEdiDocs = total;
-    this.addMSPTradingCommunity(15, total);
-    this.addTradingPartnerEnable(total);
+
     this.addPrimaryIntegrationService();
     this.addSecondaryIntegrationServices(this.noEdiDocs);
     this.addTpAndDocument();
@@ -852,6 +921,7 @@ export class HomeComponent implements OnInit {
 
   ediDocsSelectChange(e) {
     this.addProjectManagement();
+    this.addPrimaryIntegrationService();
   }
 
   //Recurring Fee - Monthly Support Service - Trading Community - 6 - array 5
@@ -939,7 +1009,7 @@ export class HomeComponent implements OnInit {
 
   addComplianceTestAndSetup() {
     let fd = this.complieanceFeeData.filter(a => a.Name == "Compliance Testing per TP per document" && a.Scope == this.complianceTestWhoPays);
-    let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs + this.noTPComplienceTested);
+    let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs * this.noTPComplienceTested);
     this.addComplienceTestingPerTPperDocument(this.complianceTestWhoPays, fd[0].Fee, qty)
 
     let fee = this.complieanceFeeData.filter(a => a.Name == "Set Up Compliance Test Site" && a.Scope == this.complianceTestWhoPays);
@@ -948,9 +1018,13 @@ export class HomeComponent implements OnInit {
   }
 
   changeNoTPComplienceTested(e) {
-    if (this.noTPComplienceTested > 0) {
-      let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs + this.noTPComplienceTested);
-      this.addComplienceTestingPerTPperDocument(this.complianceTestWhoPays, this.oneTimeFeeData.communityManagement[3].unitPrice, qty);
+    if (e.target.value > 0) {
+      if (e.target.value > 1500)
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners is the sponsor paying to have compliance tested cannot be more than 1500, Contact your manager for special pricing' });
+      else {
+        let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs * this.noTPComplienceTested);
+        this.addComplienceTestingPerTPperDocument(this.complianceTestWhoPays, this.oneTimeFeeData.communityManagement[3].unitPrice, qty);
+      }
     } else {
       this.addComplienceTestingPerTPperDocument('', 0, 0)
     }
@@ -1018,7 +1092,9 @@ export class HomeComponent implements OnInit {
     }
     else {
       this.isCompliance = false;
+      this.noTPComplienceTested = 0;
       this.addSetupComplianceTestSite('', 0, 0);
+      this.addComplienceTestingPerTPperDocument('', 0, 0);
     }
   }
 
@@ -1028,13 +1104,17 @@ export class HomeComponent implements OnInit {
     }
     else {
       this.isProvideLabel = false;
+      this.noRetailerDivisionLabels = 0;
       this.addCreateLabels(0, 0);
     }
   }
 
   lablesChange(e) {
-    if (this.noRetailerDivisionLabels > 0)
-      this.addCreateLabels(295, this.noRetailerDivisionLabels);
+    if (e.target.value > 0)
+      if (e.target.value > 1500)
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of retailer divisions need labels cannot be more than 1500, Contact your manager for special pricing' });
+      else
+        this.addCreateLabels(495, this.noRetailerDivisionLabels);
     else
       this.addCreateLabels(0, 0);
   }
@@ -1056,6 +1136,8 @@ export class HomeComponent implements OnInit {
       this.addSetupSponsorPaidPortal(0, 0);
       this.addTradingPartnerFeesSponsorPaidPortal(0, 0);
       this.addVolumeForDiWeb('', 0, 0);
+      this.isPrivatePortal = false;
+      this.noTPusingPortal = 0;
       this.isHubPaying = false;
     }
   }
@@ -1063,8 +1145,8 @@ export class HomeComponent implements OnInit {
   //Recurring Fees - Volume Plan - Volume for DiWeb - 7 - array 6
   addVolumeForDiWeb(instructions, unitPrice, qty) {
     this.recurringFeeData.volumePlan[6].instructions = instructions;
-    this.recurringFeeData.volumePlan[6].unitPrice = unitPrice * this.convertedCurrency;
-    this.recurringFeeData.volumePlan[6].quantity = qty;
+    this.recurringFeeData.volumePlan[6].unitPrice = qty;
+    this.recurringFeeData.volumePlan[6].quantity = unitPrice * this.convertedCurrency;
     this.recurringFeeData.volumePlan[6].price = unitPrice * qty * this.convertedCurrency;
     this.recurringFeeData.volumePlan[6].afterDiscountPrice = unitPrice * qty * this.convertedCurrency;
   }
@@ -1081,9 +1163,13 @@ export class HomeComponent implements OnInit {
   }
 
   tpPortalChange(e) {
-    if (this.noTPusingPortal > 0) {
-      this.addTradingPartnerFeesSponsorPaidPortal(150, this.noTPusingPortal);
-      this.addVolumeForDiWeb('Number of User IDs', 20, this.noTPusingPortal);
+    if (e.target.value > 0) {
+      if (e.target.value > 2000)
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners using the Portal cannot be more than 2000, Contact your manager for special pricing' });
+      else {
+        this.addTradingPartnerFeesSponsorPaidPortal(150, this.noTPusingPortal);
+        this.addVolumeForDiWeb('Number of User IDs', 20, this.noTPusingPortal);
+      }
     } else {
       this.addTradingPartnerFeesSponsorPaidPortal(0, 0);
       this.addVolumeForDiWeb('', 0, 0);
@@ -1113,7 +1199,7 @@ export class HomeComponent implements OnInit {
     }
     else {
       this.isIntegrationMethodology = false;
-
+      this.selectedSecondaryIntegrationMethod = '';
       this.oneTimeFeeData.integrationServices[1].oneTimeDeliverable = "";
       this.oneTimeFeeData.integrationServices[1].unitPrice = 0;
       this.oneTimeFeeData.integrationServices[1].quantity = 0;
@@ -1150,16 +1236,16 @@ export class HomeComponent implements OnInit {
   }
 
   checkIntegrationMethod() {
-    //if (this.selectedSecondaryIntegrationMethod == this.selectedPrimaryIntegrationMethod)
-    //  this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Secondary integration method can not be same as primary integration method' });
-    //else 
-    if (this.selectedSecondaryIntegrationMethod == "Embedded Adapter") {
-      let type = this.selectedSecondaryIntegrationMethod + ' ' + (this.buySideCheck ? "Buy Side" : "Sell Side");
-      let erp = this.erpData.filter(a => a.Name == this.selectedErp && a.Type.toString().indexOf(type.toString()) !== -1);
-      let valid = erp.length > 0 ? (erp[0].Valid == 1 ? true : false) : false;
-      if (!valid)
-        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'EMBEDDED ADAPTER DOES NOT EXIST FOR THIS ERP' });
-    }
+    if (this.selectedSecondaryIntegrationMethod == this.selectedPrimaryIntegrationMethod)
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Secondary integration method can not be same as primary integration method' });
+    else
+      if (this.selectedSecondaryIntegrationMethod == "Embedded Adapter" || this.selectedPrimaryIntegrationMethod == "Embedded Adapter") {
+        let type = this.selectedSecondaryIntegrationMethod + ' ' + (this.buySideCheck ? "Buy Side" : "Sell Side");
+        let erp = this.erpData.filter(a => a.Name == this.selectedErp && a.Type.toString().indexOf(type.toString()) !== -1);
+        let valid = erp.length > 0 ? (erp[0].Valid == 1 ? true : false) : false;
+        if (!valid)
+          this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Embedded Adapter does not exist for this ERP' });
+      }
   }
 
   tpUsingEdiStandards(e) {
@@ -1325,7 +1411,7 @@ export class HomeComponent implements OnInit {
     let tp = 0;
     this.ediLoop.forEach(e => {
       if (e.integratedERPDiPulse == "Outbound from Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
-        tp += e.noOfTP;
+        tp += 1;
       }
     });
     let type = this.selectedPrimaryIntegrationMethod + ' ' + (this.buySideCheck == true ? "Buy Side" : "Sell Side");
@@ -1482,29 +1568,29 @@ export class HomeComponent implements OnInit {
       let tp = 0;
       this.ediLoop.forEach(e => {
         if (e.integratedERPDiPulse == "Outbound from Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
-          transactionType += 1;
-          tp += e.noOfTP;
+          transactionType += 1; //2
+          tp += e.noOfTP; // 18
         }
       });
-      let projectWeeks = (4 * transactionType) + 1;
+      let projectWeeks = (4 * transactionType) + 1; // 9
       let PMperWeek;
       if (tp > 500)
         PMperWeek = 8;
       else {
         let filter = this.pmFeeData.filter(a => tp >= a.Min && tp <= a.Max);
-        PMperWeek = filter.length > 0 ? filter[0].PMHoursPerWeek : 0;
+        PMperWeek = filter.length > 0 ? filter[0].PMHoursPerWeek : 0; //4
       }
-      let totalPmHours = (projectWeeks * PMperWeek) > 416 ? 416 : (projectWeeks * PMperWeek);
-      let adjustedPmHours = this.buySideCheck ? (totalPmHours / 2) : totalPmHours;
+      let totalPmHours = (projectWeeks * PMperWeek) > 416 ? 416 : (projectWeeks * PMperWeek); //36
+      let adjustedPmHours = this.buySideCheck ? (totalPmHours / 2) : totalPmHours; //18
       let ecom;
       if (this.totalEcommerce >= 9)
         ecom = this.ecomFeeData.filter(a => a.EcommerceWebsites == 4 && a.NumberProcessesAutomated == '9+');
       else
         ecom = this.ecomFeeData.filter(a => a.EcommerceWebsites == 4 && a.NumberProcessesAutomated == this.totalEcommerce);
 
-      console.log(ecom)
+      //72
       let valuePMHours = ecom.length > 0 ? ecom[0].PMHours : 0;
-      let finalTotalPMHours = adjustedPmHours * valuePMHours;
+      let finalTotalPMHours = adjustedPmHours + valuePMHours;
       this.projectManagement(150, finalTotalPMHours);
     }
     else
@@ -1792,6 +1878,7 @@ export class HomeComponent implements OnInit {
     this.noDocUsedInBusinessRules = 0;
     this.isDiMetricsHost = false;
     this.noKBHostedEachMonth = 0;
+    this.noTPInScope = 0;
     this.addMSPDimetrics();
     this.additionServiceTab3 = true;
     this.addServiceBureauSetup(0, 0, 0);
@@ -1866,6 +1953,25 @@ export class HomeComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of KB hosted each month should not be greater than 10000' });
 
       this.emptyDimetricsOtherTable();
+    }
+  }
+
+  noTPInScopeChange(e) {
+    if (this.noEdiDocs > 0) {
+      let loop : any[] = this.ediLoop;
+      this.maxEDITpNo = loop.sort((a, b) => a.noOfTP - b.noOfTP).reverse()[0].noOfTP;
+      if (e.target.value < this.maxEDITpNo) {
+        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Enter a number equal or higher than the max of the tps per doc' });
+        this.addMSPTradingCommunity(15, 0);
+      }
+      else{
+        this.addMSPTradingCommunity(15, e.target.value);
+        this.addTradingPartnerEnable(e.target.value);
+      }
+    } else{
+      this.noTPInScope = 0;
+      this.addMSPTradingCommunity(15, 0);
+      this.addTradingPartnerEnable(0);
     }
   }
 
@@ -1989,7 +2095,7 @@ export class HomeComponent implements OnInit {
 
   docsPerMonthChange(e) {
     if (this.docsPerMonth >= 4000)
-      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents per month should not be greater than 3999' });
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents (850, 810, 855, 865) per month should not be greater than 3999' });
     else {
       if (this.docsPerMonth > 0)
         this.addServiceBureauDocs1();
@@ -2021,7 +2127,7 @@ export class HomeComponent implements OnInit {
 
   docs856PerMonthChange(e) {
     if (this.docs856PerMonth >= 4000)
-      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents per month should not be greater than 3999' });
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents (856) per month should not be greater than 3999' });
     else {
       if (this.docs856PerMonth > 0)
         this.addServiceBureauDocs2();
@@ -2053,7 +2159,7 @@ export class HomeComponent implements OnInit {
 
   lineItemsPerMonthChange(e) {
     if (this.lineItemsPerMonth >= 4000)
-      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Line items should not be greater than 3999' });
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Monthly Line Items for all Users should not be greater than 3999' });
     else {
       if (this.lineItemsPerMonth > 0)
         this.addServiceBureauDocs3();
@@ -2086,7 +2192,7 @@ export class HomeComponent implements OnInit {
 
   labelsServiceBureauUsersPerMonthChange(e) {
     if (this.labelsServiceBureauUsersPerMonth >= 4000)
-      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Labels should not be greater than 3999' });
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Labels are the Service Bureau users planning per month should not be greater than 3999' });
     else {
       if (this.labelsServiceBureauUsersPerMonth > 0)
         this.addServiceBureauDocs4();
@@ -2291,9 +2397,8 @@ export class HomeComponent implements OnInit {
   }
 
   newReport() {
-    if (confirm("Are you sure you want to create new report that leads to clear all fields values?")) {
-      this.clearManagedServiceInputes();
-      this.hideShowTab(1);
+    if (confirm("Are you sure you want to create new report that leads to refresh application?")) {
+      window.location.reload();
     }
   }
 }

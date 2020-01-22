@@ -184,17 +184,14 @@
                                                 </td>
                                                 <td><input [(ngModel)]="i.noOfTP" class="form-control" type="number"
                                                         (keyup)="changeEdiTP($event)" placeholder="Enter Number Here"
-                                                        value="0" min="0"
-                                                        pTooltip="Enter a number equal or higher than the max of the tps per doc"
-                                                        tooltipPosition="top">
+                                                        value="0" min="0">
                                                 </td>
                                                 <td>
                                                     <select class="form-control" [(ngModel)]="i.integratedERPDiPulse"
                                                         (ngModelChange)="ediDocsSelectChange($event)">
-                                                        <option value=""></option>
                                                         <option>Only be used in DiPulse</option>
                                                         <option>Outbound from Trading Partner</option>
-                                                        <option>Inbound from Trading Partner</option>
+                                                        <option selected>Inbound from Trading Partner</option>
                                                     </select>
                                                 </td>
                                             </tr>
@@ -226,6 +223,13 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Enter the number of trading partners on scope</label>
+                                <div class="col-md-8 p-1">
+                                    <input [(ngModel)]="noTPInScope" type="number" class="form-control col-md-6 p-1"
+                                        (keyup)="noTPInScopeChange($event)" min="0">
                                 </div>
                             </div>
                             <div class="row mb-2 m-0">
@@ -356,7 +360,7 @@
                                 </div>
 
                             </div>
-                            <div class="row mb-2 m-0 ">
+                            <div class="row">
                                 <div class="col-md-12 p-0 table-responsive">
                                     <table *ngIf="isEcommerceTable" class="table table-bordered table-sm table-striped">
                                         <thead>
@@ -402,6 +406,18 @@
                                     </table>
                                 </div>
 
+                            </div>
+                            <div class="row mb-2 m-0">
+                                <label class="col-md-4 p-1">Contract Period </label>
+                                <div class="col-md-8 p-1">
+                                    <div class="input-group w-25">
+                                        <input [(ngModel)]="contractMonths" value="0" type="number"
+                                            class="form-control">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Months</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row mb-2 m-0">
                                 <div class="col-md-12 p-1">
@@ -607,7 +623,8 @@
                         <div class="col-md-3">
                             <h5> Contract Period</h5>
                             <div class="input-group m-auto pt-3 w-50">
-                                <input [(ngModel)]="contractMonths" value="0" type="number" class="form-control">
+                                <input [(ngModel)]="contractMonths" value="0" type="number" class="form-control"
+                                    readonly>
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Months</span>
                                 </div>
@@ -992,8 +1009,10 @@
                     <div class="pb-3 pr-5 pt-2 pl-5">
                         <button (click)="newReport()" class="btn btn-info float-left btn-sm">Generate New
                             Report</button>
-                        <button (click)="downloadReport()" class="btn btn-success float-right btn-sm"><i
-                                class="fa fa-download mr-2"></i>Download Pricing Table</button>
+                        <button (click)="exportExcel()" class="btn btn-dark float-right"><i
+                                class="fa fa-2x fa-file-excel-o"></i></button>
+                        <button (click)="downloadReport()" class="btn btn-success float-right mr-3"><i
+                                class="fa fa-2x fa-file-pdf-o"></i></button>
                     </div>
                     <div class="p-5">
                         <h4><i class="fa fa-calculator"></i> Final Price Calculation Report <span
@@ -1001,13 +1020,13 @@
                                 {{todayDate | date:'short'}}</span></h4>
                         <hr>
                         <div>
-                            <table id="finalReportId" class="table table-bordered table-sm">
+                            <table #finalReportId id="finalReportId" class="table table-bordered table-sm">
                                 <tbody>
                                     <tr class="bg-light">
                                         <td colspan="8" class="font-weight-bold text-center">One Time Fee
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr style="background: aquamarine;">
                                         <th>Item</th>
                                         <th>One Time Deliverable</th>
                                         <th>ERP</th>
@@ -1166,7 +1185,7 @@
                                         <td colspan="8" class="font-weight-bold text-center">Recurring Fee
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr style="background: aquamarine;">
                                         <th>Item</th>
                                         <th>Monthly Recurring Deliverable</th>
                                         <th>Instructions</th>
