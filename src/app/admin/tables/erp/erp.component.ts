@@ -19,6 +19,7 @@ export interface Erp {
 export class ErpComponent implements OnInit {
   cols: any[];
   erpData: any[] = [];
+  finalerpData: any[] = [];
   displayDialog: boolean;
   erp: Erp = {};
   selectedErp: Erp;
@@ -45,6 +46,7 @@ export class ErpComponent implements OnInit {
     this.service.getAllErp()
       .subscribe(data => {
         this.erpData = data;
+        this.finalerpData = data;
       });
   }
 
@@ -54,12 +56,13 @@ export class ErpComponent implements OnInit {
         .subscribe(data1 => {
           let index = this.erpData.indexOf(this.selectedErp);
           this.erpData = this.erpData.filter((val, i) => i != index);
+          this.finalerpData = this.finalerpData.filter((val, i) => i != index);
           this.erp = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
-          this.service.addLogs('ERP', this.selectedErp.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
-          .subscribe(l => {
-          });
+          this.service.addLogs('ERP', this.selectedErp.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete',this.selectedErp,null)
+            .subscribe(l => {
+            });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -92,22 +95,24 @@ export class ErpComponent implements OnInit {
       this.service.addErp(this.erp)
         .subscribe(data1 => {
           this.erpData.push(data1);
+          this.finalerpData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
-          this.service.addLogs('ERP', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
-          .subscribe(l => {
-          });
+          this.service.addLogs('ERP', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add', null, data1)
+            .subscribe(l => {
+            });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
     }
     else {
+      let old = this.finalerpData.filter(a => a.Id == this.erp.Id)
       this.service.updateErp(this.erp)
         .subscribe(data1 => {
           erps[this.erpData.indexOf(this.selectedErp)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
-          this.service.addLogs('ERP', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
-          .subscribe(l => {
-          });
+          this.service.addLogs('ERP', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update', old[0], data1)
+            .subscribe(l => {
+            });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });

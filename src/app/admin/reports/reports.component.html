@@ -5,7 +5,7 @@
             <h5>Report Management</h5>
         </div>
         <div class="card-body">
-            <p-table #dt [columns]="cols" [value]="reportData" [paginator]="true" [rows]="15">
+            <p-table #dt [columns]="cols" [value]="reportData" [paginator]="true" [rows]="10">
                 <ng-template pTemplate="caption">
                     <div style="text-align: right">
                         <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
@@ -47,15 +47,17 @@
     <p-dialog header="Report Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
         showEffect="fade" [modal]="true" [style]="{width: '900px'}" [autoZIndex]="false">
         <div class="pb-3 pr-5 pt-2">
-            <button (click)="downloadReport()" class="btn btn-success float-right btn-sm"><i
-                    class="fa fa-download mr-2"></i>Download Pricing Table</button>
+            <button (click)="exportExcel()" class="btn btn-success float-right"><i
+                    class="fa fa-2x fa-file-excel-o"></i></button>
+            <button (click)="downloadReport()" class="btn btn-danger float-right mr-3"><i
+                    class="fa fa-2x fa-file-pdf-o"></i></button>
         </div>
         <div class="p-5">
             <h4><i class="fa fa-calculator"></i> Final Price Calculation Report <span class="float-right">Date :
                     {{todayDate | date:'short'}}</span></h4>
             <hr>
             <div>
-                <table id="finalReportId" class="table table-bordered table-sm">
+                <table #finalReportId id="finalReportId" class="table table-bordered table-sm">
                     <tbody>
                         <tr class="bg-light">
                             <td colspan="8" class="font-weight-bold text-center">One Time Fee
@@ -271,7 +273,7 @@
                             <td>{{item.OneTimeDeliverable}}</td>
                             <td>{{item.Erp}}</td>
                             <td>{{item.UnitPrice}}</td>
-                            <td>{{item.Quantity}}</td>
+                            <td>{{item.Quantity | currency:currency}}</td>
                             <td>{{item.Price | currency:currency}}</td>
                             <td>{{item.Discount}}%</td>
                             <td>{{item.AfterDiscountPrice | currency:currency}}</td>
@@ -392,6 +394,7 @@
                     <th>No. of Trading partners using the Portal</th>
                     <th>No. EDI</th>
                     <th>No. NON-EDI</th>
+                    <th>Enter the number of trading partners under EDI on scope</th>
                     <th>Choose min no. of KB</th>
                     <th>Selected Plan</th>
                     <th>Service Plan Offered</th>
@@ -406,8 +409,8 @@
                     <th>DiPulse</th>
                     <th>No. of Additional DiPulse id's needed beyond Master's ID</th>
                     <th>DiMetrics</th>
-                    <th>Number of Business Rules</th>
-                    <th>Number of Documents used in Business Rules</th>
+                    <th>Existing number of Business Rules (If there is a need of new dimetrics business rules, please use professional services tab)</th>
+                    <th>Number of Documents used in existing Business Rules</th>
                     <th>Should DiMetrics host any customer files administered by customer</th>
                     <th>No. of KB associated will they be hosting each month</th>
                     <th>Service Bureau</th>
@@ -454,6 +457,7 @@
                     <td>{{i.MBuySideNoTPUsingPortal}}</td>
                     <td>{{i.MNoEdi}}</td>
                     <td>{{i.MNoNonEdi}}</td>
+                    <td>{{i.MnoTPInScope}}</td>
                     <td>{{i.MKBPlan}}</td>
                     <td>{{i.MSelectedKBPlan}}</td>
                     <td>{{i.MServicePlan}}</td>

@@ -287,14 +287,14 @@ export class AdminService {
             PlanNo: plan.PlanNo,
             VolumeOrdersPerMonth: plan.VolumeOrdersPerMonth,
             VolumeOrdersPerYear: plan.VolumeOrdersPerYear,
-            YearlyCost: plan.YearlyCost,
-            MonthlyPrice: plan.MonthlyPrice,
-            AveragePricePerOrder: plan.AveragePricePerOrder,
-            AverageFee: plan.AverageFee,
-            CostForTheYear2: plan.CostForTheYear2,
-            MonthlyPrice3: plan.MonthlyPrice3,
-            AveragePricePerOrder4: plan.AveragePricePerOrder4,
-            AverageFee5: plan.AverageFee5
+            YearlyCostByMonthlyPlan: plan.YearlyCostByMonthlyPlan,
+            MonthlyPriceByMonthlyPlan: plan.MonthlyPriceByMonthlyPlan,
+            AveragePricePerOrderByMonthlyPlan: plan.AveragePricePerOrderByMonthlyPlan,
+            OverageFeeByMonthlyPlan: plan.OverageFeeByMonthlyPlan,
+            CostForTheYear2ByAnnualPlan: plan.CostForTheYear2ByAnnualPlan,
+            MonthlyPrice3ByAnnualPlan: plan.MonthlyPrice3ByAnnualPlan,
+            AveragePricePerOrder4ByAnnualPlan: plan.AveragePricePerOrder4ByAnnualPlan,
+            OverageFee5ByAnnualPlan: plan.OverageFee5ByAnnualPlan
         })
         let headers = new HttpHeaders();
         headers = headers.set('content-Type', 'application/json;charset=utf-8');
@@ -315,14 +315,14 @@ export class AdminService {
             PlanNo: plan.PlanNo,
             VolumeOrdersPerMonth: plan.VolumeOrdersPerMonth,
             VolumeOrdersPerYear: plan.VolumeOrdersPerYear,
-            YearlyCost: plan.YearlyCost,
-            MonthlyPrice: plan.MonthlyPrice,
-            AveragePricePerOrder: plan.AveragePricePerOrder,
-            AverageFee: plan.AverageFee,
-            CostForTheYear2: plan.CostForTheYear2,
-            MonthlyPrice3: plan.MonthlyPrice3,
-            AveragePricePerOrder4: plan.AveragePricePerOrder4,
-            AverageFee5: plan.AverageFee5
+            YearlyCostByMonthlyPlan: plan.YearlyCostByMonthlyPlan,
+            MonthlyPriceByMonthlyPlan: plan.MonthlyPriceByMonthlyPlan,
+            AveragePricePerOrderByMonthlyPlan: plan.AveragePricePerOrderByMonthlyPlan,
+            OverageFeeByMonthlyPlan: plan.OverageFeeByMonthlyPlan,
+            CostForTheYear2ByAnnualPlan: plan.CostForTheYear2ByAnnualPlan,
+            MonthlyPrice3ByAnnualPlan: plan.MonthlyPrice3ByAnnualPlan,
+            AveragePricePerOrder4ByAnnualPlan: plan.AveragePricePerOrder4ByAnnualPlan,
+            OverageFee5ByAnnualPlan: plan.OverageFee5ByAnnualPlan
         })
         let headers = new HttpHeaders();
         headers = headers.set('content-Type', 'application/json;charset=utf-8');
@@ -338,127 +338,132 @@ export class AdminService {
     }
 
     //Community management fee
-    // getAllComManFee() {
-    //     return Observable.create((observer) => {
-    //         return this.http.get(this.url + 'EDI')
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     console.error(err);
-    //                 });
-    //     });
-    // }
+    getAllComManFee() {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'AdminCommunityManagementFees')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
 
-    // deleteComManFeeId(id) {
-    //     let headers = new HttpHeaders();
-    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
-    //     return Observable.create((observer) => {
-    //         return this.http.delete(this.url + 'EDI/' + id)
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     console.log(err)
-    //                 });
-    //     });
-    // }
+    deleteComManFeeId(id) {
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.delete(this.url + 'AdminCommunityManagementFees/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.log(err)
+                    });
+        });
+    }
 
-    // addComManFee(fee) {
-    //     const body1 = JSON.stringify({
-    //         EdiDocs: edi.EdiDocs
-    //     })
-    //     let headers = new HttpHeaders();
-    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
-    //     return Observable.create((observer) => {
-    //         return this.http.post(this.url + 'EDI', body1, { headers: headers })
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     observer.next(err);
-    //                 });
-    //     });
-    // }
+    addComManFee(fee) {
+        const body1 = JSON.stringify({
+            "Name": fee.Name,
+            "Fee": fee.Fee,
+            "Type": fee.Type
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'AdminCommunityManagementFees', body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
 
-    // updateComManFee(fee) {
-    //     const body1 = JSON.stringify({
-    //         EdiDocs: edi.EdiDocs
-    //     })
-    //     let headers = new HttpHeaders();
-    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
-    //     return Observable.create((observer) => {
-    //         return this.http.put(this.url + 'EDI/' + edi.Id, body1, { headers: headers })
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     observer.next(err);
-    //                 });
-    //     });
-    // }
+    updateComManFee(fee) {
+        const body1 = JSON.stringify({
+            "Name": fee.Name,
+            "Fee": fee.Fee,
+            "Type": fee.Type
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.put(this.url + 'AdminCommunityManagementFees/' + fee.Id, body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
 
     //Communication fee
-    // getAllComFee() {
-    //     return Observable.create((observer) => {
-    //         return this.http.get(this.url + 'EDI')
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     console.error(err);
-    //                 });
-    //     });
-    // }
+    getAllComFee() {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'CommunicationFees')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
 
-    // deleteComFeeId(id) {
-    //     let headers = new HttpHeaders();
-    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
-    //     return Observable.create((observer) => {
-    //         return this.http.delete(this.url + 'EDI/' + id)
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     console.log(err)
-    //                 });
-    //     });
-    // }
+    deleteComFeeId(id) {
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.delete(this.url + 'CommunicationFees/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.log(err)
+                    });
+        });
+    }
 
-    // addComFee(fee) {
-    //     const body1 = JSON.stringify({
-    //         EdiDocs: edi.EdiDocs
-    //     })
-    //     let headers = new HttpHeaders();
-    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
-    //     return Observable.create((observer) => {
-    //         return this.http.post(this.url + 'EDI', body1, { headers: headers })
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     observer.next(err);
-    //                 });
-    //     });
-    // }
+    addComFee(fee) {
+        const body1 = JSON.stringify({
+            "Name": fee.Name,
+            "Fee": fee.Fee
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'CommunicationFees', body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
 
-    // updateComFee(fee) {
-    //     const body1 = JSON.stringify({
-    //         EdiDocs: edi.EdiDocs
-    //     })
-    //     let headers = new HttpHeaders();
-    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
-    //     return Observable.create((observer) => {
-    //         return this.http.put(this.url + 'EDI/' + edi.Id, body1, { headers: headers })
-    //             .subscribe(data => {
-    //                 observer.next(data);
-    //             },
-    //                 err => {
-    //                     observer.next(err);
-    //                 });
-    //     });
-    // }
-
+    updateComFee(fee) {
+        const body1 = JSON.stringify({
+            "Name": fee.Name,
+            "Fee": fee.Fee
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.put(this.url + 'CommunicationFees/' + fee.Id, body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
 
     //Complaince fee
     getAllComplainceFee() {
@@ -657,6 +662,71 @@ export class AdminService {
         });
     }
 
+    //Diametrics fee 3
+    getAllDiametricsFee3() {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'DimetricsFeesThirdPart')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    deleteDiametricsFee3Id(id) {
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.delete(this.url + 'DimetricsFeesThirdPart/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.log(err)
+                    });
+        });
+    }
+
+    addDiametricsFee3(fee) {
+        const body1 = JSON.stringify({
+            "Min": fee.Min,
+            "Max": fee.Max,
+            "Fee": fee.Fee
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'DimetricsFeesThirdPart', body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
+    updateDiametricsFee3(fee) {
+        const body1 = JSON.stringify({
+            "Min": fee.Min,
+            "Max": fee.Max,
+            "Fee": fee.Fee
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.put(this.url + 'DimetricsFeesThirdPart/' + fee.Id, body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
     //Ecommerce Process
     getAllEcomProcess() {
         return Observable.create((observer) => {
@@ -780,6 +850,70 @@ export class AdminService {
         headers = headers.set('content-Type', 'application/json;charset=utf-8');
         return Observable.create((observer) => {
             return this.http.put(this.url + 'PMFees/' + fee.Id, body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
+    //Discount limitation
+    getDiscountLimitations() {
+        return Observable.create((observer) => {
+            return this.http.get(this.url + 'DiscountLimitations')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    // deletePmFeeId(id) {
+    //     let headers = new HttpHeaders();
+    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
+    //     return Observable.create((observer) => {
+    //         return this.http.delete(this.url + 'DiscountLimitations/' + id)
+    //             .subscribe(data => {
+    //                 observer.next(data);
+    //             },
+    //                 err => {
+    //                     console.log(err)
+    //                 });
+    //     });
+    // }
+
+    // addPmFee(fee) {
+    //     const body1 = JSON.stringify({
+    //         TPs: fee.TPs,
+    //         Min: fee.Min,
+    //         Max: fee.Max,
+    //         PMHoursPerWeek: fee.PMHoursPerWeek
+    //     })
+    //     let headers = new HttpHeaders();
+    //     headers = headers.set('content-Type', 'application/json;charset=utf-8');
+    //     return Observable.create((observer) => {
+    //         return this.http.post(this.url + 'DiscountLimitations', body1, { headers: headers })
+    //             .subscribe(data => {
+    //                 observer.next(data);
+    //             },
+    //                 err => {
+    //                     observer.next(err);
+    //                 });
+    //     });
+    // }
+
+    updateDiscountLimitations(fee) {
+        const body1 = JSON.stringify({
+            Discount: fee.Discount,
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.put(this.url + 'DiscountLimitations/' + fee.Id, body1, { headers: headers })
                 .subscribe(data => {
                     observer.next(data);
                 },
@@ -1036,14 +1170,16 @@ export class AdminService {
         });
     }
 
-    addLogs(tableName, rowid, userName, userId, action) {
+    addLogs(tableName, rowid, userName, userId, action, old, newv) {
         const body1 = JSON.stringify({
             "TableName": tableName,
             "RowId": rowid,
             "Date": new Date(),
             "UserName": userName,
             "UserId": userId,
-            "OperationType": action
+            "OperationType": action,
+            "OldValues": JSON.stringify(old),
+            "NewValues": JSON.stringify(newv)
         })
         let headers = new HttpHeaders();
         headers = headers.set('content-Type', 'application/json;charset=utf-8');

@@ -7,14 +7,14 @@ export interface Plan {
   PlanNo?;
   VolumeOrdersPerMonth?;
   VolumeOrdersPerYear?;
-  YearlyCost?;
-  MonthlyPrice?;
-  AveragePricePerOrder?;
-  AverageFee?;
-  CostForTheYear2?;
-  MonthlyPrice3?;
-  AveragePricePerOrder4?;
-  AverageFee5?;
+  YearlyCostByMonthlyPlan?;
+  MonthlyPriceByMonthlyPlan?;
+  AveragePricePerOrderByMonthlyPlan?;
+  OverageFeeByMonthlyPlan?;
+  CostForTheYear2ByAnnualPlan?;
+  MonthlyPrice3ByAnnualPlan?;
+  AveragePricePerOrder4ByAnnualPlan?;
+  OverageFee5ByAnnualPlan?;
 }
 
 @Component({
@@ -27,6 +27,7 @@ export class DropShipVolumePlanComponent implements OnInit {
 
   cols: any[];
   planData: any[] = [];
+  finalPlanData: any[] = [];
   displayDialog: boolean;
   plan: Plan = {};
   selectedPlan: Plan;
@@ -40,14 +41,14 @@ export class DropShipVolumePlanComponent implements OnInit {
       { field: 'PlanNo', header: 'PlanNo.' },
       { field: 'VolumeOrdersPerMonth', header: 'Orders/Month' },
       { field: 'VolumeOrdersPerYear', header: 'Orders/Year' },
-      { field: 'YearlyCost', header: 'Yearly Cost' },
-      { field: 'MonthlyPrice', header: 'Monthly Price' },
-      { field: 'AveragePricePerOrder', header: 'Avg. Price/Order' },
-      { field: 'AverageFee', header: 'Avg. Fee' },
-      { field: 'CostForTheYear2', header: 'Cost For Year2' },
-      { field: 'MonthlyPrice3', header: 'Monthly Price3' },
-      { field: 'AveragePricePerOrder4', header: 'Avg. Price/Order4' },
-      { field: 'AverageFee5', header: 'Avg. Fee5' }
+      { field: 'YearlyCostByMonthlyPlan', header: 'Yearly Cost By Monthly Plan' },
+      { field: 'MonthlyPriceByMonthlyPlan', header: 'Monthly Price By Monthly Plan' },
+      { field: 'AveragePricePerOrderByMonthlyPlan', header: 'Average Price Per Order By Monthly Plan' },
+      { field: 'OverageFeeByMonthlyPlan', header: 'Overage Fee By Monthly Plan' },
+      { field: 'CostForTheYear2ByAnnualPlan', header: 'Cost For The Year2 By Annual Plan' },
+      { field: 'MonthlyPrice3ByAnnualPlan', header: 'Monthly Price3 By Annual Plan' },
+      { field: 'AveragePricePerOrder4ByAnnualPlan', header: 'Average Price Per Order4 By Annual Plan' },
+      { field: 'OverageFee5ByAnnualPlan', header: 'Overage Fee5 By Annual Plan' }
     ];
   }
 
@@ -59,6 +60,7 @@ export class DropShipVolumePlanComponent implements OnInit {
     this.service.getAllDSVPlan()
       .subscribe(data => {
         this.planData = data;
+        this.finalPlanData = data;
       });
   }
 
@@ -68,10 +70,11 @@ export class DropShipVolumePlanComponent implements OnInit {
         .subscribe(data1 => {
           let index = this.planData.indexOf(this.selectedPlan);
           this.planData = this.planData.filter((val, i) => i != index);
+          this.finalPlanData = this.finalPlanData.filter((val, i) => i != index);
           this.plan = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
-          this.service.addLogs('DropShipVolumePlan', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
+          this.service.addLogs('DropShipVolumePlan', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete',this.selectedPlan,null)
           .subscribe(l => {
           });
         }, err => {
@@ -106,8 +109,9 @@ export class DropShipVolumePlanComponent implements OnInit {
       this.service.addDSVPlan(this.plan)
         .subscribe(data1 => {
           this.planData.push(data1);
+          this.finalPlanData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
-          this.service.addLogs('DropShipVolumePlan', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
+          this.service.addLogs('DropShipVolumePlan', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add',null, data1)
           .subscribe(l => {
           });
         }, err => {
@@ -115,11 +119,12 @@ export class DropShipVolumePlanComponent implements OnInit {
         });
     }
     else {
+      let old = this.finalPlanData.filter(a => a.Id == this.plan.Id)
       this.service.updateDSVPlan(this.plan)
         .subscribe(data1 => {
           erps[this.planData.indexOf(this.selectedPlan)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
-          this.service.addLogs('DropShipVolumePlan', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update')
+          this.service.addLogs('DropShipVolumePlan', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update', old[0], data1)
           .subscribe(l => {
           });
         }, err => {

@@ -35,6 +35,67 @@ export class HomeService {
         });
     }
 
+    getAllVarienceFees() {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'VarienceFees')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getAllCommunicationFees() {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'CommunicationFees')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getAllDimetricsFeesThirdPart() {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'DimetricsFeesThirdPart')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getAllAdminCommunityManagementFees() {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'AdminCommunityManagementFees')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    //Discount limitation
+    getDiscountLimitations() {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'DiscountLimitations')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
     getAllMsKbPlans() {
         return Observable.create((observer) => {
             return this._http.get(this.url + 'KBPlans')
@@ -171,11 +232,12 @@ export class HomeService {
         });
     }
 
-    postUserReportData(userId, feeType, section, item, deliverable, erp, up, qty, price, discount, afterDiscountPrice) {
+    postUserReportData(userId, feeType, section, rowid, item, deliverable, erp, up, qty, price, discount, afterDiscountPrice) {
         const body1 = JSON.stringify({
             "UserId": userId,
             "FeeType": feeType,
             "Section": section,
+            "RowId": rowid,
             "Item": item,
             "OneTimeDeliverable": deliverable,
             "Erp": erp,
@@ -239,6 +301,7 @@ export class HomeService {
             "MNoNonEdi": userInputs.MNoNonEdi,
             "MEdiTpsScope": userInputs.MEdiTpsScope,
             "MNonEdiTpsScope": userInputs.MNonEdiTpsScope,
+            "MnoTPInScope": userInputs.MnoTPInScope,
             "MKBPlan": userInputs.MKBPlan,
             "MSelectedKBPlan": userInputs.MSelectedKBPlan,
             "MServicePlan": userInputs.MServicePlan,
@@ -349,6 +412,78 @@ export class HomeService {
     getDealIdData(id) {
         return Observable.create((observer) => {
             return this._http.get(this.url + 'Users/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getReportDetails(id) {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'Users/' + id + '?flag=true')
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getEdiDetails(id) {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'UserInputesEdis/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getNonEdiDetails(id) {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'UserInputesNonEdis/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getEcommerceDetails(id) {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'UserInputesEcommerces/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getInputDetails(id) {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'UserInputes/' + id)
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        console.error(err);
+                    });
+        });
+    }
+
+    getUsersFeeDetails(id) {
+        return Observable.create((observer) => {
+            return this._http.get(this.url + 'UsersFee/' + id)
                 .subscribe(data => {
                     observer.next(data);
                 },

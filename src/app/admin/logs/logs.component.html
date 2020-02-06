@@ -1,10 +1,10 @@
 <div *ngIf="permission" class="container">
     <div class="card mt-3">
         <div class="card-header">
-            <h5>ADMIN USERS</h5>
+            <h5>Logs</h5>
         </div>
         <div class="card-body">
-            <p-table #dt [columns]="cols" [value]="logsData" [paginator]="true" [rows]="15">
+            <p-table #dt [columns]="cols" [value]="logsData" [paginator]="true" [rows]="5">
                 <ng-template pTemplate="caption">
                     <div style="text-align: right">
                         <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
@@ -14,7 +14,7 @@
                 </ng-template>
                 <ng-template pTemplate="header" let-columns>
                     <tr>
-                        <th *ngFor="let col of columns" [pSortableColumn]="col.field">
+                        <th [style.width]="col.width" *ngFor="let col of columns" [pSortableColumn]="col.field">
                             {{col.header}}
                             <p-sortIcon [field]="col.field"></p-sortIcon>
                         </th>
@@ -22,7 +22,7 @@
                 </ng-template>
                 <ng-template pTemplate="body" let-rowData let-columns="columns">
                     <tr [pSelectableRow]="rowData">
-                        <td *ngFor="let col of columns">
+                        <td  *ngFor="let col of columns">
                             {{rowData[col.field]}}
                         </td>
                     </tr>

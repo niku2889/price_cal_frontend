@@ -1,8 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { AdminService } from '../services';
 import { MessageService } from 'primeng/api';
 import * as jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
+const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+const EXCEL_EXTENSION = '.xlsx';
 
 @Component({
   selector: 'app-reports',
@@ -11,6 +15,7 @@ import 'jspdf-autotable';
   providers: [AdminService, MessageService]
 })
 export class ReportsComponent implements OnInit {
+  @ViewChild('finalReportId', { static: false }) table: ElementRef;
   cols: any[];
   cols2: any[];
   displayDialog = false;
@@ -217,6 +222,23 @@ export class ReportsComponent implements OnInit {
     doc.save('Final-Report-' + this.todayDate + '.pdf');
   }
 
+  exportExcel() {
+    let d = [];
+    d.push(this.oneTimeFeeData);
+    d.push(this.recurringFeeData);
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(this.table.nativeElement, { raw: true });
+    const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    this.saveAsExcelFile(excelBuffer, "Pricing Report");
+  }
+
+  saveAsExcelFile(buffer: any, fileName: string): void {
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE
+    });
+    FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+  }
+
   finalReportData(index) {
     if (index == 1) {
       return this.oneTimeFeeData != null ? this.oneTimeFeeData.communicationServices.filter(a => a.AfterDiscountPrice != 0 && a.AfterDiscountPrice != '') : [];
@@ -238,7 +260,7 @@ export class ReportsComponent implements OnInit {
       let a = [];
       if (this.recurringFeeData != null) {
         for (let i = 0; i < this.recurringFeeData.volumePlan.length; i++) {
-          if (this.recurringFeeData.volumePlan[i].Item == "Transaction Fees" || this.recurringFeeData.volumePlan[i].Item == "DiWeb ID’s for Partners" || this.recurringFeeData.volumePlan[i].Item == "") {
+          if (this.recurringFeeData.volumePlan[i].Item == "Transaction Fees" || this.recurringFeeData.volumePlan[i].Item == "DiWeb ID’s for Partners" || this.recurringFeeData.volumePlan[i].Item != "") {
             if (this.recurringFeeData.volumePlan[i].AfterDiscountPrice != 0 && this.recurringFeeData.volumePlan[i].AfterDiscountPrice != '')
               a.push(this.recurringFeeData.volumePlan[i])
           }

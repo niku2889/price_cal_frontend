@@ -2,7 +2,7 @@
 <div class="container">
     <div class="card mt-3">
         <div class="card-header">
-            <h5>Community Management Fees</h5>
+            <h5>Dimetrics Fees3</h5>
         </div>
         <div class="card-body">
             <p-table #dt [columns]="cols" [value]="planData" selectionMode="single" [(selection)]="selectedPlan"
@@ -40,23 +40,21 @@
         </div>
     </div>
     <p-dialog header="Plan Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
-        showEffect="fade" [modal]="true" [style]="{width: '400px'}" [autoZIndex]="false">
+        showEffect="fade" [modal]="true" [style]="{width: '600px'}" [autoZIndex]="false">
         <div class="ui-g ui-fluid" *ngIf="plan">
             <div class="ui-g-12 p-0">
-                <label class="font-weight-bold">Name</label>
-                <input class="form-control" [(ngModel)]="plan.Name" autofocus type="text" />
+                <label class="font-weight-bold">Min</label>
+                <input class="form-control" [(ngModel)]="plan.Min" autofocus type="number"/>
             </div>
             <div class="ui-g-12 p-0">
-                <label class="font-weight-bold"> Fee</label>
-                <input class="form-control" [(ngModel)]="plan.Fee" autofocus type="number" />
-            </div>
-            <div class="ui-g-12 p-0">
-                <label class="font-weight-bold"> Type</label>
-                <input class="form-control" [(ngModel)]="plan.Type" autofocus type="text" />
-            </div>
-            <div class="ui-g-12 p-0">
-                <label class="font-weight-bold"> Description</label>
-                <input class="form-control" [(ngModel)]="plan.Description" autofocus type="text" />
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Max</label>
+                    <input class="form-control" [(ngModel)]="plan.Max" autofocus type="number" />
+                </div>
+                <div class="ui-g-6">
+                    <label class="font-weight-bold">Fee</label>
+                    <input class="form-control" [(ngModel)]="plan.Fee" autofocus type="number"/>
+                </div>
             </div>
         </div>
         <p-footer>

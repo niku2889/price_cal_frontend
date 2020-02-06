@@ -20,6 +20,7 @@ export class AdminUsersComponent implements OnInit {
 
   cols: any[];
   planData: any[] = [];
+  finalPlanData: any[] = [];
   displayDialog: boolean;
   plan: Plan = {};
   selectedPlan: Plan;
@@ -47,6 +48,7 @@ export class AdminUsersComponent implements OnInit {
     this.service.getAllAdminUsers()
       .subscribe(data => {
         this.planData = data;
+        this.finalPlanData = data;
       });
   }
 
@@ -56,10 +58,11 @@ export class AdminUsersComponent implements OnInit {
         .subscribe(data1 => {
           let index = this.planData.indexOf(this.selectedPlan);
           this.planData = this.planData.filter((val, i) => i != index);
+          this.finalPlanData = this.finalPlanData.filter((val, i) => i != index);
           this.plan = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
-          this.service.addLogs('AdminUsers', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
+          this.service.addLogs('AdminUsers', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete',this.selectedPlan,null)
             .subscribe(l => {
             });
         }, err => {
@@ -94,8 +97,9 @@ export class AdminUsersComponent implements OnInit {
       this.service.addAdminUsers(this.plan)
         .subscribe(data1 => {
           this.planData.push(data1);
+          this.finalPlanData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
-          this.service.addLogs('AdminUsers', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
+          this.service.addLogs('AdminUsers', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add',null, data1)
           .subscribe(l => {
           });
         }, err => {
@@ -103,11 +107,12 @@ export class AdminUsersComponent implements OnInit {
         });
     }
     else {
+      let old = this.finalPlanData.filter(a => a.Id == this.plan.Id)
       this.service.updateAdminUsers(this.plan)
         .subscribe(data1 => {
           erps[this.planData.indexOf(this.selectedPlan)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
-          this.service.addLogs('AdminUsers', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update')
+          this.service.addLogs('AdminUsers', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update', old[0], data1)
           .subscribe(l => {
           });
         }, err => {

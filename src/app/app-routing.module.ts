@@ -21,6 +21,8 @@ import { ServiceBureauFeesComponent } from './admin/tables/service-bureau-fees/s
 import { AdminUsersComponent } from './admin/admin-users/admin-users.component';
 import { ReportsComponent } from './admin/reports/reports.component';
 import { LogsComponent } from './admin/logs/logs.component';
+import { DiscountComponent } from './admin/tables/discount/discount.component';
+import { DiametricsFee3Component } from './admin/tables/diametrics-fee3/diametrics-fee3.component';
 
 const routes: Routes = [
   {
@@ -45,12 +47,14 @@ const routes: Routes = [
       { path: 'currencyconvertion', component: ConvertionComponent, pathMatch: 'full' },
       { path: 'diametricsfee', component: DiametricsFeesComponent, pathMatch: 'full' },
       { path: 'diametricsfee2', component: DiametricsFees2Component, pathMatch: 'full' },
+      { path: 'diametricsfee3', component: DiametricsFee3Component, pathMatch: 'full' },
       { path: 'ecommerceprocess', component: EcomProcessComponent, pathMatch: 'full' },
       { path: 'pmfees', component: PmFeesComponent, pathMatch: 'full' },
       { path: 'servicebureaufees', component: ServiceBureauFeesComponent, pathMatch: 'full' },
       { path: 'users', component: AdminUsersComponent, pathMatch: 'full' },
       { path: 'reports', component: ReportsComponent, pathMatch: 'full' },
       { path: 'logs', component: LogsComponent, pathMatch: 'full' },
+      { path: 'discount', component: DiscountComponent, pathMatch: 'full' },
     ]
   },
   { path: 'login', component: AdminLoginComponent },

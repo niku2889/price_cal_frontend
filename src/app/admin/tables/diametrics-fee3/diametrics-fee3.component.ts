@@ -3,17 +3,18 @@ import { AdminService } from '../../services';
 import { MessageService } from 'primeng/api';
 export interface Plan {
   Id?;
-  Name?;
+  Min?;
+  Max?;
   Fee?;
 }
 
 @Component({
-  selector: 'app-comm-fees',
-  templateUrl: './comm-fees.component.html',
-  styleUrls: ['./comm-fees.component.css'],
+  selector: 'app-diametrics-fee3',
+  templateUrl: './diametrics-fee3.component.html',
+  styleUrls: ['./diametrics-fee3.component.css'],
   providers: [AdminService, MessageService]
 })
-export class CommFeesComponent implements OnInit {
+export class DiametricsFee3Component implements OnInit {
 
   cols: any[];
   planData: any[] = [];
@@ -27,17 +28,18 @@ export class CommFeesComponent implements OnInit {
     private messageService: MessageService) {
 
     this.cols = [
-      { field: 'Name', header: 'Name' },
+      { field: 'Min', header: 'Min' },
+      { field: 'Max', header: 'Max' },
       { field: 'Fee', header: 'Fee' },
     ];
   }
 
   ngOnInit() {
-    this.getAllComFee();
+    this.getAllDiametricsFee3();
   }
 
-  getAllComFee() {
-    this.service.getAllComFee()
+  getAllDiametricsFee3() {
+    this.service.getAllDiametricsFee3()
       .subscribe(data => {
         this.planData = data;
         this.finalPlanData = data;
@@ -46,7 +48,7 @@ export class CommFeesComponent implements OnInit {
 
   delete() {
     if (confirm("Are you sure you want to delete this record?")) {
-      this.service.deleteComFeeId(this.selectedPlan.Id)
+      this.service.deleteDiametricsFee3Id(this.selectedPlan.Id)
         .subscribe(data1 => {
           let index = this.planData.indexOf(this.selectedPlan);
           this.planData = this.planData.filter((val, i) => i != index);
@@ -54,7 +56,7 @@ export class CommFeesComponent implements OnInit {
           this.plan = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
-          this.service.addLogs('ServiceBureauFees', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete', this.selectedPlan, null)
+          this.service.addLogs('DimetricsFeesSecondPart', this.selectedPlan.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete', this.selectedPlan, null)
             .subscribe(l => {
             });
         }, err => {
@@ -86,12 +88,12 @@ export class CommFeesComponent implements OnInit {
   save() {
     let erps = [...this.planData];
     if (this.newPlan) {
-      this.service.addComFee(this.plan)
+      this.service.addDiametricsFee3(this.plan)
         .subscribe(data1 => {
           this.planData.push(data1);
           this.finalPlanData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
-          this.service.addLogs('ServiceBureauFees', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add', null, data1)
+          this.service.addLogs('DimetricsFeesSecondPart', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add', null, data1)
             .subscribe(l => {
             });
         }, err => {
@@ -100,11 +102,11 @@ export class CommFeesComponent implements OnInit {
     }
     else {
       let old = this.finalPlanData.filter(a => a.Id == this.plan.Id)
-      this.service.updateComFee(this.plan)
+      this.service.updateDiametricsFee3(this.plan)
         .subscribe(data1 => {
           erps[this.planData.indexOf(this.selectedPlan)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
-          this.service.addLogs('ServiceBureauFees', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update', old[0], data1)
+          this.service.addLogs('DimetricsFeesSecondPart', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update', old[0], data1)
             .subscribe(l => {
             });
         }, err => {

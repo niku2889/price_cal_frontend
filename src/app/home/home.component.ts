@@ -17,6 +17,8 @@ export interface DialogData {
   customerName: string;
   currency: string;
   currencyData: [];
+  reportId: string;
+  userId: number;
 }
 
 @Component({
@@ -24,8 +26,8 @@ export interface DialogData {
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
   providers: [MessageService, HomeService],
-
 })
+
 export class HomeComponent implements OnInit {
   @ViewChild('finalReportId', { static: false }) table: ElementRef;
   email: string;
@@ -54,6 +56,11 @@ export class HomeComponent implements OnInit {
   complieanceFeeData = [];
   pmFeeData = [];
   ecomFeeData = [];
+  discountData = [];
+  communicationFeesData = [];
+  communityManagementFeesData = [];
+  diametricsThirdPartData = [];
+  varienceFee = [];
   isMs = true;
   isCompliance = false;
   isProvideLabel = false;
@@ -86,7 +93,7 @@ export class HomeComponent implements OnInit {
   totalNonEdiDocs = 0;
 
   ecommerceData = [
-    { "name": "Magneto", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
+    { "name": "Magento", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
     { "name": "Shopify", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
     { "name": "Woo Commerce", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
     { "name": "Amazon Seller Central", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false }
@@ -177,6 +184,8 @@ export class HomeComponent implements OnInit {
   headerPlan = "";
   headerPlanSub = "";
   version = 0;
+  userId = 0;
+  inputData = [];
 
   constructor(private messageService: MessageService,
     public dialog: MatDialog,
@@ -199,10 +208,22 @@ export class HomeComponent implements OnInit {
     this.getAllServiceBureauFees();
     this.getEcomFees();
     this.getPMFees();
+    this.getDiscountLimitations();
+    this.getAllAdminCommunityManagementFees();
+    this.getAllCommunicationFees();
+    this.getAllDimetricsFeesThirdPart();
+    this.getAllVarienceFees();
 
     this.service.getOneTimeFeeData().then(data => this.oneTimeFeeData = data);
     this.service.getRecurringFeeData().then(data => this.recurringFeeData = data);
 
+  }
+
+  getDiscountLimitations() {
+    this.service.getDiscountLimitations()
+      .subscribe(data => {
+        this.discountData = data;
+      });
   }
 
   getAllErp() {
@@ -210,6 +231,34 @@ export class HomeComponent implements OnInit {
       .subscribe(data => {
         this.erpData = data;
         this.addPrimaryIntegrationService();
+      });
+  }
+
+  getAllVarienceFees() {
+    this.service.getAllVarienceFees()
+      .subscribe(data => {
+        this.varienceFee = data;
+      });
+  }
+
+  getAllDimetricsFeesThirdPart() {
+    this.service.getAllDimetricsFeesThirdPart()
+      .subscribe(data => {
+        this.diametricsThirdPartData = data;
+      });
+  }
+
+  getAllAdminCommunityManagementFees() {
+    this.service.getAllAdminCommunityManagementFees()
+      .subscribe(data => {
+        this.communityManagementFeesData = data;
+      });
+  }
+
+  getAllCommunicationFees() {
+    this.service.getAllCommunicationFees()
+      .subscribe(data => {
+        this.communicationFeesData = data;
       });
   }
 
@@ -332,7 +381,7 @@ export class HomeComponent implements OnInit {
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: '500px',
-      data: { name: this.name, email: this.email, dealId: this.dealId, customerName: this.customerName, currency: this.currency, currencyData: this.currencyData },
+      data: { name: this.name, email: this.email, dealId: this.dealId, customerName: this.customerName, currency: this.currency, currencyData: this.currencyData, reportId: this.reportId, userId: this.userId },
       disableClose: true
     });
 
@@ -342,6 +391,8 @@ export class HomeComponent implements OnInit {
       this.dealId = result.dealId;
       this.customerName = result.customerName;
       this.currency = result.currency;
+      this.reportId = result.reportId;
+      this.userId = result.userId;
 
       this.service.getDealIdData(this.dealId.toString())
         .subscribe(data => {
@@ -350,6 +401,265 @@ export class HomeComponent implements OnInit {
           this.reportId = 'PC-' + this.dealId + '-V' + this.version;
         });
       this.currencyChange('');
+
+      if (this.reportId != '' && this.userId != 0) {
+        this.service.getInputDetails(this.userId)
+          .subscribe(data => {
+            this.inputData = data;
+            if (this.inputData.length > 0) {
+              this.selectedErp = this.inputData[0].MERP;
+              this.msEcommerece = this.inputData[0].MMsEcommerce;
+              this.buySideCheck = this.inputData[0].MBuySide;
+              this.sellSideCheck = this.inputData[0].MSellSide;
+              this.buySideCreateEdiSpecForBookletTp = this.inputData[0].MBuySideEdiSpecBookletTP;
+              this.buySideImplementComplianceTestProgram = this.inputData[0].MBuySideComTestProgram;
+              if (this.buySideImplementComplianceTestProgram)
+                this.isCompliance = true;
+              else
+                this.isCompliance = false;
+
+              this.complianceTestWhoPays = this.inputData[0].MBuySideWhoPays
+              this.noTPComplienceTested = this.inputData[0].MBuySideNoTPComTest;
+              this.provideLabel = this.inputData[0].MBuySideProvideLabels;
+              if (this.provideLabel)
+                this.isProvideLabel = true;
+              else
+                this.isProvideLabel = false;
+
+              this.noRetailerDivisionLabels = this.inputData[0].MBuySideRetailerNeedLabels;
+              this.hubPayingForSupplier = this.inputData[0].MBuySideIsHubPaying;
+              if (this.hubPayingForSupplier)
+                this.isHubPaying = true;
+              else
+                this.isHubPaying = false;
+
+              this.isPrivatePortal = this.inputData[0].MBuySideIsPrivatePortal;
+              this.noTPusingPortal = this.inputData[0].MBuySideNoTPUsingPortal;
+              this.noEdiDocs = this.inputData[0].MNoEdi;
+              this.noNonEdiDocs = this.inputData[0].MNoNonEdi;
+              this.noTPInScope = this.inputData[0].MnoTPInScope;
+              this.selectedKBPlan = this.inputData[0].MKBPlan;
+              this.isAdditionalPlanDetails = true;
+              if (this.selectedKBPlan == "Drop Ship Volume Plan") {
+                this.isDropShipVolumePlan = true;
+                this.isMsKbPlan = false;
+                this.selectedDropShipVolumePlan = this.inputData[0].MSelectedKBPlan;
+                this.headerPlan = "Volume Plan";
+                this.headerPlanSub = "MAX Orders"
+              }
+              else {
+                this.isMsKbPlan = true;
+                this.isDropShipVolumePlan = false;
+                this.selectedMSKBPlan = this.inputData[0].MSelectedKBPlan;
+                this.headerPlan = "KB Plan";
+                this.headerPlanSub = "MAX Kb's";
+              }
+              this.dsvpSelectedServicePlan = this.inputData[0].MServicePlan;
+              this.dsvpSelectedProgram = this.inputData[0].MServicePlan1;
+              this.dsvpSelectedPlan = this.inputData[0].MServicePlan2;
+
+              this.selectedPrimaryIntegrationMethod = this.inputData[0].MPrimaryInteration;
+              this.moreIntegrationMethodology = this.inputData[0].MSecondaryIntegration == null || this.inputData[0].MSecondaryIntegration == '' ? false : true;
+              if (this.moreIntegrationMethodology)
+                this.isIntegrationMethodology = true;
+              else
+                this.isIntegrationMethodology = false;
+
+              this.selectedSecondaryIntegrationMethod = this.inputData[0].MSecondaryIntegration;
+              this.tpUsingOnlyEdiStandards = this.inputData[0].MTPUsingEDIStandard;
+              if (this.tpUsingOnlyEdiStandards)
+                this.isTpUsingEdiStandards = false;
+              else
+                this.isTpUsingEdiStandards = true;
+
+              this.noElectronicallyIntegratedNonEdiTp = this.inputData[0].MElectoicallyNonEdiTp;
+              if (this.noElectronicallyIntegratedNonEdiTp > 0)
+                this.isEcommerceTable = true;
+              else
+                this.isEcommerceTable = false;
+
+              this.contractMonths = this.inputData[0].TCVMonths;
+              this.isClientNeedAdditionalSerices = this.inputData[0].MAdditionalServices;
+              this.diPulse = this.inputData[0].ADiPulse;
+              if (this.diPulse)
+                this.additionServiceTab1 = false;
+              else
+                this.additionServiceTab1 = true;
+
+              this.diMetrics = this.inputData[0].ADiMetrics;
+              if (this.diMetrics)
+                this.additionServiceTab2 = false;
+              else
+                this.additionServiceTab2 = true;
+
+              this.serviceBureau = this.inputData[0].AServiceBureau;
+              if (this.serviceBureau)
+                this.additionServiceTab3 = false;
+              else
+                this.additionServiceTab3 = true;
+
+              this.communicationSoftware = this.inputData[0].ACommunicationSoftware;
+              if (this.communicationSoftware)
+                this.additionServiceTab4 = false;
+              else
+                this.additionServiceTab4 = true;
+
+              this.onsiteProfessionalServices = this.inputData[0].AOnsiteProfessionalServices;
+              if (this.onsiteProfessionalServices)
+                this.additionServiceTab5 = false;
+              else
+                this.additionServiceTab5 = true;
+
+              if (this.diPulse || this.diMetrics || this.serviceBureau || this.communicationSoftware || this.onsiteProfessionalServices) {
+                this.isAdditionalService = true;
+                this.isAdditionalTab = true;
+              }
+              this.noDiPulseIdNeeded = this.inputData[0].ADiPulseNoAdditionalId;
+              this.noBusinessRules = this.inputData[0].ADiMetricsBusinessRule;
+              this.noDocUsedInBusinessRules = this.inputData[0].ADiMetricsNoDocuments;
+              this.isDiMetricsHost = this.inputData[0].ADiMetricsHostCustomer;
+              this.noKBHostedEachMonth = this.inputData[0].ADiMetricsNoKBAssociated;
+              this.noDocServiceBureauUsers = this.inputData[0].AServiceBureauHowManyDocs;
+              this.sponsorPayingServiceBureauUsers = this.inputData[0].AServiceBureauSponsorUsers;
+              this.serviceBureauUsersInProject = this.inputData[0].AServiceBureauUsersInProject;
+              this.docsPerMonth = this.inputData[0].AServiceBureau850855865810DocsPerMonth;
+              this.docs856PerMonth = this.inputData[0].AServiceBureau856DocsPerMonth;
+              this.labelsServiceBureauUsersPerMonth = this.inputData[0].AServiceBureauLabelsPerMonth;
+              this.lineItemsPerMonth = this.inputData[0].AServiceBureauLineItemsUsers;
+              this.identifyTheSwYes = this.inputData[0].ACommunicationSoftwareForIntegration;
+              this.protocolConnectToDicenter = this.inputData[0].ACommunicationSoftwareProtocol;
+              this.howManyHoursNeeded = this.inputData[0].AOnsiteProfessionalServicesHours;
+
+              this.service.getEdiDetails(this.inputData[0].Id)
+                .subscribe(data1 => {
+                  if (data1.length > 0) {
+                    this.ediLoop = [];
+                    for (let i = 0; i < data1.length; i++) {
+                      let ediModel = {
+                        ediDocs: data1[i].EdiDocs,
+                        noOfTP: data1[i].NoOfTP,
+                        integratedERPDiPulse: data1[i].IntegratedErpDiPulse
+                      }
+                      this.ediLoop.push(ediModel)
+                    }
+                    this.totalEdiDocs = 0;
+                    this.ediLoop.forEach(element => {
+                      this.totalEdiDocs += element.noOfTP;
+                    });
+                    this.isEDI = true;
+                  }
+                  this.service.getNonEdiDetails(this.inputData[0].Id)
+                    .subscribe(data2 => {
+                      if (data2.length > 0) {
+                        this.nonEdiLoop = [];
+                        for (let i = 0; i < data2.length; i++) {
+                          let ediModel = {
+                            nonEdiDocs: data2[i].NonEdiDocs,
+                            noOfNonEdiTP: data2[i].NoOfTP,
+                          }
+                          this.nonEdiLoop.push(ediModel)
+                        }
+                        this.totalNonEdiDocs = 0;
+                        this.nonEdiLoop.forEach(element => {
+                          this.totalNonEdiDocs += element.noOfNonEdiTP;
+                        });
+                        this.isNonEDI = true;
+                      }
+                      this.service.getEcommerceDetails(this.inputData[0].Id)
+                        .subscribe(data3 => {
+                          if (data3.length > 0) {
+                            let m = data3.filter(a => a.Name == 'Magento');
+                            this.ecommerceData[0].orders = m[0].Orders;
+                            this.ecommerceData[0].product = m[0].Product;
+                            this.ecommerceData[0].fullfilment = m[0].Fullfilment;
+                            this.ecommerceData[0].payment = m[0].Inventory;
+                            this.ecommerceData[0].inventory = m[0].Payment;
+
+                            let s = data3.filter(a => a.Name == 'Shopify');
+                            this.ecommerceData[1].orders = s[0].Orders;
+                            this.ecommerceData[1].product = s[0].Product;
+                            this.ecommerceData[1].fullfilment = s[0].Fullfilment;
+                            this.ecommerceData[1].payment = s[0].Inventory;
+                            this.ecommerceData[1].inventory = s[0].Payment;
+
+                            let w = data3.filter(a => a.Name == 'Woo Commerce');
+                            this.ecommerceData[2].orders = w[0].Orders;
+                            this.ecommerceData[2].product = w[0].Product;
+                            this.ecommerceData[2].fullfilment = w[0].Fullfilment;
+                            this.ecommerceData[2].payment = w[0].Inventory;
+                            this.ecommerceData[2].inventory = w[0].Payment;
+
+                            let a = data3.filter(a => a.Name == 'Amazon Seller Central');
+                            this.ecommerceData[3].orders = a[0].Orders;
+                            this.ecommerceData[3].product = a[0].Product;
+                            this.ecommerceData[3].fullfilment = a[0].Fullfilment;
+                            this.ecommerceData[3].payment = a[0].Inventory;
+                            this.ecommerceData[3].inventory = a[0].Payment;
+
+                            this.ecommerceData.forEach(e => {
+                              if (e.orders)
+                                this.totalEcommerce += 1;
+                              else if (e.product)
+                                this.totalEcommerce += 1;
+                              else if (e.fullfilment)
+                                this.totalEcommerce += 1;
+                              else if (e.payment)
+                                this.totalEcommerce += 1;
+                              else if (e.inventory)
+                                this.totalEcommerce += 1;
+                            });
+                          }
+                        });
+                    });
+                });
+
+              this.service.getUsersFeeDetails(this.inputData[0].Id)
+                .subscribe(data4 => {
+                  if (data4.length > 0) {
+                    this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'communicationServices'), 'communicationServices');
+                    this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'integrationServices'), 'integrationServices');
+                    this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'tpAndDocumentActivation'), 'tpAndDocumentActivation');
+                    this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'administrativeAndManagementServices'), 'administrativeAndManagementServices');
+                    this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'communityManagement'), 'communityManagement');
+                    this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'projectManagement'), 'projectManagement');
+                    this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'other'), 'other');
+
+                    this.updateRecurringFeeSection(data4.filter(a => a.FeeType == 'Recurring' && a.Section == 'monthlySupportService'), 'monthlySupportService');
+                    this.updateRecurringFeeSection(data4.filter(a => a.FeeType == 'Recurring' && a.Section == 'volumePlan'), 'volumePlan');
+                    this.updateRecurringFeeSection(data4.filter(a => a.FeeType == 'Recurring' && a.Section == 'serviceBureau'), 'serviceBureau');
+                    this.updateRecurringFeeSection(data4.filter(a => a.FeeType == 'Recurring' && a.Section == 'nonEdiFormattedFees'), 'nonEdiFormattedFees');
+                    this.updateRecurringFeeSection(data4.filter(a => a.FeeType == 'Recurring' && a.Section == 'other'), 'other');
+                  }
+                });
+            }
+          });
+      }
+    });
+  }
+
+  updateOneTimeFeeSection(data, section) {
+    data.forEach(e => {
+      this.oneTimeFeeData[section][e.RowId - 1].item = e.Item;
+      this.oneTimeFeeData[section][e.RowId - 1].oneTimeDeliverable = e.OneTimeDeliverable;
+      this.oneTimeFeeData[section][e.RowId - 1].erp = e.Erp;
+      this.oneTimeFeeData[section][e.RowId - 1].unitPrice = e.UnitPrice;
+      this.oneTimeFeeData[section][e.RowId - 1].quantity = e.Quantity;
+      this.oneTimeFeeData[section][e.RowId - 1].price = e.Price;
+      this.oneTimeFeeData[section][e.RowId - 1].discount = e.Discount;
+      this.oneTimeFeeData[section][e.RowId - 1].afterDiscountPrice = e.AfterDiscountPrice;
+    });
+  }
+
+  updateRecurringFeeSection(data, section) {
+    data.forEach(e => {
+      this.recurringFeeData[section][e.RowId - 1].item = e.Item;
+      this.recurringFeeData[section][e.RowId - 1].monthlyRecurringDeliverable = e.OneTimeDeliverable;
+      this.recurringFeeData[section][e.RowId - 1].instructions = e.Erp;
+      this.recurringFeeData[section][e.RowId - 1].unitPrice = e.UnitPrice;
+      this.recurringFeeData[section][e.RowId - 1].quantity = e.Quantity;
+      this.recurringFeeData[section][e.RowId - 1].price = e.Price;
+      this.recurringFeeData[section][e.RowId - 1].discount = e.Discount;
+      this.recurringFeeData[section][e.RowId - 1].afterDiscountPrice = e.AfterDiscountPrice;
     });
   }
 
@@ -421,6 +731,7 @@ export class HomeComponent implements OnInit {
         this.addNonEdiFormattedFees3();
         this.addNonEdiFormattedFees4();
         this.addNonEdiFormattedFees5();
+        this.changeServicePlan(this.dsvpSelectedServicePlan);
       }
     } else if (id == 4) {
       if (confirm("You cannot make modification after finalizing. Do you want to proceed?")) {
@@ -444,7 +755,6 @@ export class HomeComponent implements OnInit {
     //   this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Contract Period can not be zero' });
     //   return false;
     // } else
-    console.log(this.isClientNeedAdditionalSerices)
     if (this.isClientNeedAdditionalSerices) {
       if (this.noBusinessRules == 0 && this.diMetrics) {
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'A Business Rule is needed' });
@@ -485,7 +795,7 @@ export class HomeComponent implements OnInit {
   validateManagedServiceTab() {
     if (this.ediLoop.length > 0) {
       let loop = this.ediLoop;
-      this.maxEDITpNo = loop.sort((a, b) => a.noOfTP - b.noOfTP).reverse()[0].noOfTP;
+      this.maxEDITpNo = Math.max(...this.ediLoop.map(d => d.noOfTP))
     }
     let valid;
     if (this.selectedSecondaryIntegrationMethod == "Embedded Adapter" || this.selectedPrimaryIntegrationMethod == "Embedded Adapter") {
@@ -510,23 +820,26 @@ export class HomeComponent implements OnInit {
     } else if (this.noTPusingPortal > 2000) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners using the Portal cannot be more than 2000, Contact your manager for special pricing' });
       return false;
-    } else if (this.noEdiDocs == 0 && this.noNonEdiDocs == 0) {
+    } else if (this.noEdiDocs == 0 || this.noEdiDocs == null) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Number of Documents on Scope is require' });
       return false;
     } else if (this.noTPInScope < this.maxEDITpNo) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Enter a number equal or higher than the max of the tps per doc' });
       return false;
-    } else if (this.selectedKBPlan == "" || !this.selectedKBPlan) {
+    } else if ((this.selectedKBPlan == "" || !this.selectedKBPlan) && this.selectedKBPlan != "No Plan") {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Choose min no. of KB' });
       return false;
-    } else if (this.dsvpSelectedServicePlan == "" || !this.dsvpSelectedServicePlan) {
+    } else if ((this.dsvpSelectedServicePlan == "" || !this.dsvpSelectedServicePlan) && this.selectedKBPlan != "No Plan") {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Choose Service Plan Offered' });
       return false;
-    } else if (this.dsvpSelectedProgram == "" || !this.dsvpSelectedProgram) {
+    } else if ((this.dsvpSelectedProgram == "" || !this.dsvpSelectedProgram) && this.selectedKBPlan != "No Plan") {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Choose Standard Replenishment or Drop Ship Program' });
       return false;
-    } else if (this.dsvpSelectedPlan == "" || !this.dsvpSelectedPlan) {
+    } else if ((this.dsvpSelectedPlan == "" || !this.dsvpSelectedPlan) && this.selectedKBPlan != "No Plan") {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Choose Annual Plan or Monthly Plan' });
+      return false;
+    } else if (this.moreIntegrationMethodology && this.selectedSecondaryIntegrationMethod == "") {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Secondary integration method is require' });
       return false;
     } else if (this.selectedSecondaryIntegrationMethod == this.selectedPrimaryIntegrationMethod) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Secondary integration method can not be same as primary integration method' });
@@ -534,19 +847,18 @@ export class HomeComponent implements OnInit {
     } else if (!valid) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Embedded Adapter does not exist for this ERP' });
       return false;
-    } else if (this.noElectronicallyIntegratedNonEdiTp > 0) {
-      if (this.totalEcommerce == 0) {
-        this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Fill values in E-commerce matrix' });
-        return false;
-      } else
-        return true;
+    } else if ((this.msEcommerece == 'E-Commerce' || this.msEcommerece == 'Both') && this.totalEcommerce == 0) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Fill values in E-commerce matrix by unchecking "Are all TPs using only EDI Standards?"' });
+      return false;
+    } else if (this.noElectronicallyIntegratedNonEdiTp > 0 && this.totalEcommerce == 0) {
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Fill values in E-commerce matrix' });
+      return false;
     } else if (this.contractMonths == null) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Contract Period required' });
       return false;
     } else {
       return true;
     }
-
   }
 
   postUserData() {
@@ -588,6 +900,7 @@ export class HomeComponent implements OnInit {
       MBuySideNoTPUsingPortal: this.noTPusingPortal,
       MNoEdi: this.noEdiDocs,
       MNoNonEdi: this.noNonEdiDocs,
+      MnoTPInScope: this.noTPInScope,
       MKBPlan: this.selectedKBPlan,
       MSelectedKBPlan: this.selectedKBPlan == "MS KB Plan" ? this.selectedMSKBPlan : this.selectedDropShipVolumePlan,
       MServicePlan: this.dsvpSelectedServicePlan,
@@ -615,7 +928,7 @@ export class HomeComponent implements OnInit {
       AServiceBureau856DocsPerMonth: this.docs856PerMonth,
       AServiceBureauLabelsPerMonth: this.labelsServiceBureauUsersPerMonth,
       AServiceBureauLineItemsUsers: this.lineItemsPerMonth,
-      ACommunicationSoftwareForIntegration: this.identifyTheSwNo,
+      ACommunicationSoftwareForIntegration: this.identifyTheSwYes,
       ACommunicationSoftwareProtocol: this.protocolConnectToDicenter,
       AOnsiteProfessionalServicesHours: this.howManyHoursNeeded,
     };
@@ -649,13 +962,13 @@ export class HomeComponent implements OnInit {
   postUserReportData(id, type, section, data) {
     if (data.length > 0 && type == "OneTime") {
       data.forEach(e => {
-        this.service.postUserReportData(id, type, section, e.item, e.oneTimeDeliverable, e.erp, e.unitPrice, e.quantity, e.price, e.discount, e.afterDiscountPrice)
+        this.service.postUserReportData(id, type, section, e.id, e.item, e.oneTimeDeliverable, e.erp, e.unitPrice, e.quantity, e.price, e.discount, e.afterDiscountPrice)
           .subscribe(data => {
           });
       });
     } else if (data.length > 0 && type == "Recurring") {
       data.forEach(e => {
-        this.service.postUserReportData(id, type, section, e.item, e.monthlyRecurringDeliverable, e.instructions, e.unitPrice, e.quantity, e.price, e.discount, e.afterDiscountPrice)
+        this.service.postUserReportData(id, type, section, e.id, e.item, e.monthlyRecurringDeliverable, e.instructions, e.unitPrice, e.quantity, e.price, e.discount, e.afterDiscountPrice)
           .subscribe(data => {
           });
       });
@@ -876,6 +1189,8 @@ export class HomeComponent implements OnInit {
   changeErp(e) {
     this.addPrimaryIntegrationService();
     this.addSecondaryIntegrationServices(this.noEdiDocs);
+    if (!this.tpUsingOnlyEdiStandards)
+      this.addOneTimeFeeOthersService();
   }
 
   ediChange(e) {
@@ -888,20 +1203,23 @@ export class HomeComponent implements OnInit {
       }
       this.ediLoop.push(ediModel)
     }
-    if (this.noEdiDocs > 0) {
+    if (e.target.value > 0) {
       this.isEDI = true;
       if (this.buySideCreateEdiSpecForBookletTp)
-        this.addTPEDIImplementationGuideCreation(5000, this.noEdiDocs);
+        this.addTPEDIImplementationGuideCreation(this.communityManagementFeesData.filter(a => a.Name == "Building EDI Implementation Guidelines Spec")[0].Fee, e.target.value);
 
-      let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs + this.noTPComplienceTested);
+      let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (e.target.value * this.noTPComplienceTested);
       let fd = this.complieanceFeeData.filter(a => a.Name == "Compliance Testing per TP per document" && a.Scope == this.complianceTestWhoPays);
       this.addComplienceTestingPerTPperDocument(this.complianceTestWhoPays, fd[0].Fee, qty)
-
-     
       this.addTpAndDocument();
     } else {
       this.isEDI = false;
+      this.totalEdiDocs = 0;
       this.addComplienceTestingPerTPperDocument('', 0, 0);
+      this.addPrimaryIntegrationService();
+      this.addSecondaryIntegrationServices(0);
+      this.addTPAndDocumentService("TP and Documents", '', '', 0, 0);
+      this.projectManagement(0, 0);
     }
     //this.isNonEDI = false;
   }
@@ -934,10 +1252,11 @@ export class HomeComponent implements OnInit {
 
   //One Time Fees - Community Management - Trading Partners to be enabled - 1 - array 0
   addTradingPartnerEnable(qty) {
-    this.oneTimeFeeData.communityManagement[0].unitPrice = 150 * this.convertedCurrency;
+    let fee = this.communityManagementFeesData.filter(a => a.Name == "Trading Partner Enablement Fee")[0].Fee;
+    this.oneTimeFeeData.communityManagement[0].unitPrice = fee * this.convertedCurrency;
     this.oneTimeFeeData.communityManagement[0].quantity = qty;
-    this.oneTimeFeeData.communityManagement[0].price = 150 * qty * this.convertedCurrency;
-    this.oneTimeFeeData.communityManagement[0].afterDiscountPrice = 150 * qty * this.convertedCurrency;
+    this.oneTimeFeeData.communityManagement[0].price = fee * qty * this.convertedCurrency;
+    this.oneTimeFeeData.communityManagement[0].afterDiscountPrice = fee * qty * this.convertedCurrency;
   }
 
   nonEdiChange(e) {
@@ -949,7 +1268,12 @@ export class HomeComponent implements OnInit {
       }
       this.nonEdiLoop.push(ediModel)
     }
-    this.isNonEDI = true;
+    if (e.target.value > 0) {
+      this.isNonEDI = true;
+    } else {
+      this.isNonEDI = false;
+      this.totalNonEdiDocs = 0;
+    }
   }
 
   changeNonEdiTP(e) {
@@ -958,6 +1282,8 @@ export class HomeComponent implements OnInit {
       total += element.noOfNonEdiTP;
     });
     this.totalNonEdiDocs = total;
+    if (!this.tpUsingOnlyEdiStandards)
+      this.addOneTimeFeeOthersService();
   }
 
   buySide(e) {
@@ -966,10 +1292,31 @@ export class HomeComponent implements OnInit {
     } else {
       this.sellSideCheck = true;
       this.oneTimeFeeCommunityManagement = [];
+      this.buySideCreateEdiSpecForBookletTp = false;
+      this.buySideImplementComplianceTestProgram = false;
+      this.isCompliance = false;
+      this.complianceTestWhoPays = "Trading Partner (Paid)";
+      this.noTPComplienceTested = 0;
+      this.provideLabel = false;
+      this.noRetailerDivisionLabels = 0;
+      this.hubPayingForSupplier = false;
+      this.isPrivatePortal = false;
+      this.noTPusingPortal = 0;
+      this.isProvideLabel = false;
+      this.isHubPaying = false;
+      this.addComplienceTestingPerTPperDocument('', 0, 0);
+      this.addSetupComplianceTestSite('', 0, 0);
+      this.addTPEDIImplementationGuideCreation(0, 0);
+      this.addSetupSponsorPaidPortal(0, 0);
+      this.addTradingPartnerFeesSponsorPaidPortal(0, 0);
+      this.addVolumeForDiWeb('', 0, 0);
+      this.addCreateLabels(0, 0);
     }
     this.addPrimaryIntegrationService();
     this.addSecondaryIntegrationServices(this.noEdiDocs);
     this.addTpAndDocument();
+    if (!this.tpUsingOnlyEdiStandards)
+      this.addOneTimeFeeOthersService();
   }
 
   sellSide(e) {
@@ -996,11 +1343,14 @@ export class HomeComponent implements OnInit {
       this.addCreateLabels(0, 0);
     } else {
       this.buySideCheck = true;
+
     }
     this.oneTimeFeeCommunityManagement = [];
     this.addPrimaryIntegrationService();
     this.addSecondaryIntegrationServices(this.noEdiDocs);
     this.addTpAndDocument();
+    if (!this.tpUsingOnlyEdiStandards)
+      this.addOneTimeFeeOthersService();
   }
 
   changeComplianceTestWhoPays(pays) {
@@ -1022,7 +1372,7 @@ export class HomeComponent implements OnInit {
       if (e.target.value > 1500)
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners is the sponsor paying to have compliance tested cannot be more than 1500, Contact your manager for special pricing' });
       else {
-        let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs * this.noTPComplienceTested);
+        let qty = this.complianceTestWhoPays == "Trading Partner (Paid)" ? 0 : (this.noEdiDocs * e.target.value);
         this.addComplienceTestingPerTPperDocument(this.complianceTestWhoPays, this.oneTimeFeeData.communityManagement[3].unitPrice, qty);
       }
     } else {
@@ -1032,7 +1382,7 @@ export class HomeComponent implements OnInit {
 
   createEdiSpecBooklet(e) {
     if (e.checked) {
-      this.addTPEDIImplementationGuideCreation(5000, this.noEdiDocs);
+      this.addTPEDIImplementationGuideCreation(this.communityManagementFeesData.filter(a => a.Name == "Building EDI Implementation Guidelines Spec")[0].Fee, this.noEdiDocs);
     } else {
       this.addTPEDIImplementationGuideCreation(0, 0);
     }
@@ -1068,21 +1418,35 @@ export class HomeComponent implements OnInit {
     if (e.value == "MS KB Plan") {
       this.isMsKbPlan = true;
       this.isDropShipVolumePlan = false;
+      this.dsvpChange('');
       this.headerPlan = "KB Plan";
       this.headerPlanSub = "MAX Kb's";
+      this.isAdditionalPlanDetails = true;
     }
     else if (e.value == "Drop Ship Volume Plan") {
       this.isMsKbPlan = false;
       this.isDropShipVolumePlan = true;
       this.dsvpChange('');
       this.headerPlan = "Volume Plan";
-      this.headerPlanSub = "MAX Orders"
+      this.headerPlanSub = "MAX Orders";
+      this.isAdditionalPlanDetails = true;
     } else {
       this.isMsKbPlan = false;
       this.isDropShipVolumePlan = false;
+      this.isAdditionalPlanDetails = false;
+      this.selectedMSKBPlan = "1";
+      this.selectedDropShipVolumePlan = "1";
+      this.dsvpSelectedServicePlan = "";
+      this.dsvpSelectedProgram = "";
+      this.dsvpSelectedPlan = "";
+      this.addDropShipPlanRecurringFee1("", 0, 0);
+      this.addDropShipPlanRecurringFee2("", "", 0);
+      this.addDropShipPlanRecurringFee3("");
+      this.addTransactionFees2(0);
+      this.addTransactionFees4(0);
+      this.addTransactionFees5(0, 0);
+      this.addNonEdiFormattedFees('', 0, 0);
     }
-    this.isAdditionalPlanDetails = true;
-
   }
 
   complianceTest(e) {
@@ -1114,7 +1478,7 @@ export class HomeComponent implements OnInit {
       if (e.target.value > 1500)
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of retailer divisions need labels cannot be more than 1500, Contact your manager for special pricing' });
       else
-        this.addCreateLabels(495, this.noRetailerDivisionLabels);
+        this.addCreateLabels(this.communityManagementFeesData.filter(a => a.Name == "Building out UCC 128 Labels for a singular Division")[0].Fee, e.target.value);
     else
       this.addCreateLabels(0, 0);
   }
@@ -1130,7 +1494,7 @@ export class HomeComponent implements OnInit {
   hubPaying(e) {
     if (e.checked) {
       this.isHubPaying = true;
-      this.addVolumeForDiWeb('Number of User IDs', 20, this.noTPusingPortal);
+      this.addVolumeForDiWeb('Number of User IDs', this.communityManagementFeesData.filter(a => a.Name == "DiPulse Additional ID Fee")[0].Fee, this.noTPusingPortal);
     }
     else {
       this.addSetupSponsorPaidPortal(0, 0);
@@ -1153,8 +1517,8 @@ export class HomeComponent implements OnInit {
 
   privatePortal(e) {
     if (e.checked) {
-      this.addSetupSponsorPaidPortal(3000, 1);
-      this.addTradingPartnerFeesSponsorPaidPortal(150, this.noTPusingPortal);
+      this.addSetupSponsorPaidPortal(this.communityManagementFeesData.filter(a => a.Name == "Setup of Private Portal for Sponsor")[0].Fee, 1);
+      this.addTradingPartnerFeesSponsorPaidPortal(this.communityManagementFeesData.filter(a => a.Name == "Sponsor paid ID to Private Portal")[0].Fee, this.noTPusingPortal);
     }
     else {
       this.addSetupSponsorPaidPortal(0, 0);
@@ -1167,8 +1531,8 @@ export class HomeComponent implements OnInit {
       if (e.target.value > 2000)
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners using the Portal cannot be more than 2000, Contact your manager for special pricing' });
       else {
-        this.addTradingPartnerFeesSponsorPaidPortal(150, this.noTPusingPortal);
-        this.addVolumeForDiWeb('Number of User IDs', 20, this.noTPusingPortal);
+        this.addTradingPartnerFeesSponsorPaidPortal(this.communityManagementFeesData.filter(a => a.Name == "Sponsor paid ID to Private Portal")[0].Fee, this.noTPusingPortal);
+        this.addVolumeForDiWeb('Number of User IDs', this.communityManagementFeesData.filter(a => a.Name == "DiPulse Additional ID Fee")[0].Fee, this.noTPusingPortal);
       }
     } else {
       this.addTradingPartnerFeesSponsorPaidPortal(0, 0);
@@ -1254,8 +1618,6 @@ export class HomeComponent implements OnInit {
       this.isEcommerceTable = false;
       this.totalEcommerce = 0;
       this.addOneTimeFeeOthers('', '', '', 0, 0);
-      this.addTPAndDocumentService("TP and Documents", '', '', 0, 0);
-      this.projectManagement(0, 0);
       this.ecommerceData.forEach(e => {
         e.fullfilment = false;
         e.inventory = false;
@@ -1269,6 +1631,17 @@ export class HomeComponent implements OnInit {
       this.isTpUsingEdiStandards = true;
       this.addOneTimeFeeOthersService();
     }
+    this.addTpAndDocument();
+    if (this.oneTimeFeeData.other[3].oneTimeDeliverable != "") {
+      let price = (this.oneTimeFeeData.other[3].price * this.recurringFeeData.monthlySupportService[0].unitPrice) / 100;
+      this.addNonEdiFormattedFees(this.recurringFeeData.monthlySupportService[0].instructions,
+        this.recurringFeeData.monthlySupportService[0].unitPrice, price);
+    }
+    this.addProjectManagement();
+    this.addNonEdiFormattedFees2();
+    this.addNonEdiFormattedFees3();
+    this.addNonEdiFormattedFees4();
+    this.addNonEdiFormattedFees5();
   }
 
   dsvpChange(e) {
@@ -1305,10 +1678,10 @@ export class HomeComponent implements OnInit {
         fixedFee = k[0].MinimumMonthlyFee;
       } else if (deliverable == "Measured in 850/Orders" && this.dsvpSelectedPlan == "Monthly Plan") {
         let k = this.dropShipVolumePlanData.filter(a => a.Id == this.selectedDropShipVolumePlan);
-        fixedFee = k[0].MonthlyPrice;
+        fixedFee = k[0].MonthlyPriceByMonthlyPlan;
       } else if (deliverable == "Measured in 850/Orders" && this.dsvpSelectedPlan == "Annual Plan") {
         let k = this.dropShipVolumePlanData.filter(a => a.Id == this.selectedDropShipVolumePlan);
-        fixedFee = k[0].MonthlyPrice;
+        fixedFee = k[0].MonthlyPrice3ByAnnualPlan;
       } else {
         fixedFee = 0;
       }
@@ -1332,10 +1705,10 @@ export class HomeComponent implements OnInit {
         fixedRate = k[0].OverKBRateAnnualPlan;
       } else if (deliverable == "Measured in 850/Orders" && this.dsvpSelectedPlan == "Monthly Plan") {
         let k = this.dropShipVolumePlanData.filter(a => a.Id == this.selectedDropShipVolumePlan);
-        fixedRate = k[0].AverageFee;
+        fixedRate = k[0].OverageFeeByMonthlyPlan;
       } else if (deliverable == "Measured in 850/Orders" && this.dsvpSelectedPlan == "Annual Plan") {
         let k = this.dropShipVolumePlanData.filter(a => a.Id == this.selectedDropShipVolumePlan);
-        fixedRate = k[0].AverageFee;
+        fixedRate = k[0].OverageFee5ByAnnualPlan;
       } else {
         fixedRate = 0;
       }
@@ -1344,9 +1717,9 @@ export class HomeComponent implements OnInit {
       this.addDropShipPlanRecurringFee2(deliverable, instructions, fixedRate);
       if (this.dsvpSelectedProgram != "Standard Replenishment") {
         this.addDropShipPlanRecurringFee3("No Fee");
-        this.addTransactionFees2(this.recurringFeeData.volumePlan[0].quantity == 0 ? 0 : 0.01);
-        this.addTransactionFees4(this.recurringFeeData.volumePlan[0].quantity == 0 ? 0 : 25);
-        this.addTransactionFees5(this.recurringFeeData.volumePlan[0].quantity == 0 ? 0 : 1, 1);
+        this.addTransactionFees2(this.recurringFeeData.volumePlan[0].quantity == 0 ? 0 : this.communityManagementFeesData.filter(a => a.Name == "Transaction Fees")[0].Fee);
+        this.addTransactionFees4(this.recurringFeeData.volumePlan[0].quantity == 0 ? 0 : this.communityManagementFeesData.filter(a => a.Name == "Transaction Fees2")[0].Fee);
+        this.addTransactionFees5(this.recurringFeeData.volumePlan[0].quantity == 0 ? 0 : this.communityManagementFeesData.filter(a => a.Name == "Transaction Fees3")[0].Fee, 1);
       }
       else {
         this.addDropShipPlanRecurringFee3("");
@@ -1355,9 +1728,9 @@ export class HomeComponent implements OnInit {
         this.addTransactionFees5(0, 0);
       }
       if (this.oneTimeFeeData.other[3].oneTimeDeliverable != "") {
+        let price = (this.oneTimeFeeData.other[3].price * this.recurringFeeData.monthlySupportService[0].unitPrice) / 100;
         this.addNonEdiFormattedFees(this.recurringFeeData.monthlySupportService[0].instructions,
-          this.recurringFeeData.monthlySupportService[0].unitPrice,
-          this.oneTimeFeeData.other[3].price)
+          this.recurringFeeData.monthlySupportService[0].unitPrice, price)
       }
     }
   }
@@ -1392,6 +1765,7 @@ export class HomeComponent implements OnInit {
   addTransactionFees5(fixedRate, price) {
     this.recurringFeeData.volumePlan[5].quantity = fixedRate;
     this.recurringFeeData.volumePlan[5].price = price * this.convertedCurrency;
+    this.recurringFeeData.volumePlan[5].afterDiscountPrice = price * this.convertedCurrency;
   }
 
   //Recurring Fees - Volume Plan - 	855/ORDRSP, 810/INVOIC and 856/DESADV - 4 - array 3
@@ -1437,16 +1811,19 @@ export class HomeComponent implements OnInit {
       let instructions = this.dsvpSelectedServicePlan + ' Support';
       let up;
       if (this.dsvpSelectedServicePlan == "Standard")
-        up = 1.7;
+        up = this.communityManagementFeesData.filter(a => a.Name == "Standard")[0].Fee;
       else if (this.dsvpSelectedServicePlan == "Advanced")
-        up = 2.5;
+        up = this.communityManagementFeesData.filter(a => a.Name == "Advanced")[0].Fee;
       else if (this.dsvpSelectedServicePlan == "Premium")
-        up = 3.3;
+        up = this.communityManagementFeesData.filter(a => a.Name == "Premium")[0].Fee;
 
       let price = ((this.oneTimeFeeData.integrationServices[0].price + this.oneTimeFeeData.integrationServices[1].price) * up) / 100;
       this.addMSPIntegrationService(instructions, up, price);
 
-      let price1 = ((this.oneTimeFeeData.communityManagement[0].price + this.oneTimeFeeData.communityManagement[5].price) * up) / 100;
+      let price1 = ((this.oneTimeFeeData.communityManagement[0].price + this.oneTimeFeeData.communityManagement[1].price
+        + this.oneTimeFeeData.communityManagement[2].price + this.oneTimeFeeData.communityManagement[3].price
+        + this.oneTimeFeeData.communityManagement[4].price + this.oneTimeFeeData.communityManagement[5].price
+        + this.oneTimeFeeData.communityManagement[6].price) * up) / 100;
       this.addMSPCommunityManagement(instructions, up, price1);
 
       let price2 = ((this.oneTimeFeeData.communicationServices[0].price + this.oneTimeFeeData.communicationServices[1].price) * up) / 100;
@@ -1486,7 +1863,7 @@ export class HomeComponent implements OnInit {
   }
 
   noElectronicallyIntegratedNonEdiTpChange(e) {
-    if (this.noElectronicallyIntegratedNonEdiTp == null || this.noElectronicallyIntegratedNonEdiTp == 0) {
+    if (e.target.value == null || e.target.value == 0) {
       this.isEcommerceTable = false;
       this.totalEcommerce = 0;
       this.addTPAndDocumentService("TP and Documents", '', '', 0, 0);
@@ -1499,12 +1876,16 @@ export class HomeComponent implements OnInit {
         e.product = false;
       });
       this.addOneTimeFeeOthers('', '', '', 0, 0);
+      this.addNonEdiFormattedFees2();
+      this.addNonEdiFormattedFees3();
+      this.addNonEdiFormattedFees4();
+      this.addNonEdiFormattedFees5();
     }
     else {
       this.isEcommerceTable = true;
       this.addTpAndDocument();
-      this.addProjectManagement();
     }
+    this.addProjectManagement();
   }
 
   addTpAndDocument() {
@@ -1532,8 +1913,9 @@ export class HomeComponent implements OnInit {
   addOneTimeFeeOthersService() {
     let type = this.selectedPrimaryIntegrationMethod + ' ' + (this.buySideCheck == true ? "Buy Side" : "Sell Side");
     let erp = this.erpData.filter(a => a.Name == this.selectedErp && a.Type.toString().indexOf(type.toString()) !== -1);
+    let amount = this.varienceFee.filter(a => a.Size == erp[0].Size && a.Type == (this.buySideCheck == true ? "Buy Side" : "Sell Side"))[0].Fee;
     let qty = this.totalNonEdiDocs + this.totalEcommerce;
-    this.addOneTimeFeeOthers("Non-EDI TP Integration", type, '', erp[0].Amount, qty)
+    this.addOneTimeFeeOthers("Non-EDI TP Integration", type, '', amount, qty)
   }
 
   //One Time Fees -  Other - Non-EDI TP Integration - 4 - array 3
@@ -1560,41 +1942,45 @@ export class HomeComponent implements OnInit {
     this.addNonEdiFormattedFees3();
     this.addNonEdiFormattedFees4();
     this.addNonEdiFormattedFees5();
+    if (this.oneTimeFeeData.other[3].oneTimeDeliverable != "") {
+      let price = (this.oneTimeFeeData.other[3].price * this.recurringFeeData.monthlySupportService[0].unitPrice) / 100;
+      this.addNonEdiFormattedFees(this.recurringFeeData.monthlySupportService[0].instructions,
+        this.recurringFeeData.monthlySupportService[0].unitPrice, price)
+    }
   }
 
   addProjectManagement() {
-    if (this.totalEcommerce > 0) {
-      let transactionType = 0;
-      let tp = 0;
-      this.ediLoop.forEach(e => {
-        if (e.integratedERPDiPulse == "Outbound from Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
-          transactionType += 1; //2
-          tp += e.noOfTP; // 18
-        }
-      });
-      let projectWeeks = (4 * transactionType) + 1; // 9
-      let PMperWeek;
-      if (tp > 500)
-        PMperWeek = 8;
-      else {
-        let filter = this.pmFeeData.filter(a => tp >= a.Min && tp <= a.Max);
-        PMperWeek = filter.length > 0 ? filter[0].PMHoursPerWeek : 0; //4
+    //if (this.totalEcommerce > 0) {
+    let transactionType = 0;
+    let tp = this.noTPInScope;
+    this.ediLoop.forEach(e => {
+      if (e.integratedERPDiPulse == "Outbound from Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
+        transactionType += 1;
+        //tp += e.noOfTP; 
       }
-      let totalPmHours = (projectWeeks * PMperWeek) > 416 ? 416 : (projectWeeks * PMperWeek); //36
-      let adjustedPmHours = this.buySideCheck ? (totalPmHours / 2) : totalPmHours; //18
-      let ecom;
-      if (this.totalEcommerce >= 9)
-        ecom = this.ecomFeeData.filter(a => a.EcommerceWebsites == 4 && a.NumberProcessesAutomated == '9+');
-      else
-        ecom = this.ecomFeeData.filter(a => a.EcommerceWebsites == 4 && a.NumberProcessesAutomated == this.totalEcommerce);
-
-      //72
-      let valuePMHours = ecom.length > 0 ? ecom[0].PMHours : 0;
-      let finalTotalPMHours = adjustedPmHours + valuePMHours;
-      this.projectManagement(150, finalTotalPMHours);
+    });
+    let projectWeeks = (4 * transactionType) + 1;
+    let PMperWeek;
+    if (tp > 500)
+      PMperWeek = 8;
+    else {
+      let filter = this.pmFeeData.filter(a => tp >= a.Min && tp <= a.Max);
+      PMperWeek = filter.length > 0 ? filter[0].PMHoursPerWeek : 0;
     }
+    let totalPmHours = (projectWeeks * PMperWeek) > 416 ? 416 : (projectWeeks * PMperWeek);
+    let adjustedPmHours = this.buySideCheck ? (totalPmHours / 2) : totalPmHours;
+    let ecom;
+    if (this.totalEcommerce >= 9)
+      ecom = this.ecomFeeData.filter(a => a.EcommerceWebsites == 4 && a.NumberProcessesAutomated == '9+');
     else
-      this.projectManagement(0, 0);
+      ecom = this.ecomFeeData.filter(a => a.EcommerceWebsites == 4 && a.NumberProcessesAutomated == this.totalEcommerce);
+
+    let valuePMHours = ecom.length > 0 ? ecom[0].PMHours : 0;
+    let finalTotalPMHours = adjustedPmHours + valuePMHours;
+    this.projectManagement(this.communityManagementFeesData.filter(a => a.Name == "Project Management")[0].Fee, finalTotalPMHours);
+    // }
+    // else
+    //   this.projectManagement(0, 0);
   }
 
   //One Time Fees -  Project Management - 1 - array 0
@@ -1607,97 +1993,125 @@ export class HomeComponent implements OnInit {
 
   //Recurring Fees - NON EDI Formatted Fees - 	Ecommerce Web Site Traffic - 2 - array 1
   addNonEdiFormattedFees2() {
-    let mogneto = this.ecommerceData.filter(a => a.name == "Magneto");
-    let count = mogneto[0].orders ? 1 : 0;
-    count += mogneto[0].payment ? 1 : 0;
-    count += mogneto[0].product ? 1 : 0;
-    count += mogneto[0].fullfilment ? 1 : 0;
-    count += mogneto[0].inventory ? 1 : 0;
+    let magento = this.ecommerceData.filter(a => a.name == "Magento");
+    let count = 0;
+    count = magento[0].orders ? 1 : 0;
+    count += magento[0].payment ? 1 : 0;
+    count += magento[0].product ? 1 : 0;
+    count += magento[0].fullfilment ? 1 : 0;
+    count += magento[0].inventory ? 1 : 0;
 
-    let price;
+    let price = 0;
+    let fee = this.communityManagementFeesData.filter(a => a.Name == "Magento")[0].Fee;
+    let aFee = this.communityManagementFeesData.filter(a => a.Name == "Ecommerce Additional Fees")[0].Fee;
     if (count == 0)
       price = 0;
     else if (count == 1)
-      price = 250;
+      price = fee;
     else if (count > 1)
-      price = 250 + ((count - 1) * 50);
+      price = fee + ((count - 1) * aFee);
 
-    if (mogneto[0].orders || mogneto[0].payment || mogneto[0].product || mogneto[0].fullfilment || mogneto[0].inventory) {
+    if (magento[0].orders || magento[0].payment || magento[0].product || magento[0].fullfilment || magento[0].inventory) {
       this.recurringFeeData.nonEdiFormattedFees[1].quantity = count;
       this.recurringFeeData.nonEdiFormattedFees[1].price = price * this.convertedCurrency;
       this.recurringFeeData.nonEdiFormattedFees[1].afterDiscountPrice = price * this.convertedCurrency;
+    } else {
+      this.recurringFeeData.nonEdiFormattedFees[1].quantity = 0;
+      this.recurringFeeData.nonEdiFormattedFees[1].price = 0;
+      this.recurringFeeData.nonEdiFormattedFees[1].afterDiscountPrice = 0;
     }
   }
 
   //Recurring Fees - NON EDI Formatted Fees - 	Ecommerce Web Site Traffic - 3 - array 2
   addNonEdiFormattedFees3() {
     let shopify = this.ecommerceData.filter(a => a.name == "Shopify");
-    let count = shopify[0].orders ? 1 : 0;
+    let count = 0;
+    count = shopify[0].orders ? 1 : 0;
     count += shopify[0].payment ? 1 : 0;
     count += shopify[0].product ? 1 : 0;
     count += shopify[0].fullfilment ? 1 : 0;
     count += shopify[0].inventory ? 1 : 0;
 
-    let price;
+    let price = 0;
+    let fee = this.communityManagementFeesData.filter(a => a.Name == "Shopify")[0].Fee;
+    let aFee = this.communityManagementFeesData.filter(a => a.Name == "Ecommerce Additional Fees")[0].Fee;
     if (count == 0)
       price = 0;
     else if (count == 1)
-      price = 250;
+      price = fee;
     else if (count > 1)
-      price = 250 + ((count - 1) * 50);
+      price = fee + ((count - 1) * aFee);
 
     if (shopify[0].orders || shopify[0].payment || shopify[0].product || shopify[0].fullfilment || shopify[0].inventory) {
       this.recurringFeeData.nonEdiFormattedFees[2].quantity = count;
       this.recurringFeeData.nonEdiFormattedFees[2].price = price * this.convertedCurrency;
       this.recurringFeeData.nonEdiFormattedFees[2].afterDiscountPrice = price * this.convertedCurrency;
+    } else {
+      this.recurringFeeData.nonEdiFormattedFees[2].quantity = 0;
+      this.recurringFeeData.nonEdiFormattedFees[2].price = 0;
+      this.recurringFeeData.nonEdiFormattedFees[2].afterDiscountPrice = 0;
     }
   }
 
   //Recurring Fees - NON EDI Formatted Fees - 	Ecommerce Web Site Traffic - 4 - array 3
   addNonEdiFormattedFees4() {
     let wc = this.ecommerceData.filter(a => a.name == "Woo Commerce");
-    let count = wc[0].orders ? 1 : 0;
+    let count = 0;
+    count = wc[0].orders ? 1 : 0;
     count += wc[0].payment ? 1 : 0;
     count += wc[0].product ? 1 : 0;
     count += wc[0].fullfilment ? 1 : 0;
     count += wc[0].inventory ? 1 : 0;
 
-    let price;
+    let price = 0;
+    let fee = this.communityManagementFeesData.filter(a => a.Name == "Woo Commerce")[0].Fee;
+    let aFee = this.communityManagementFeesData.filter(a => a.Name == "Ecommerce Additional Fees")[0].Fee;
     if (count == 0)
       price = 0;
     else if (count == 1)
-      price = 250;
+      price = fee;
     else if (count > 1)
-      price = 250 + ((count - 1) * 50);
+      price = fee + ((count - 1) * aFee);
 
     if (wc[0].orders || wc[0].payment || wc[0].product || wc[0].fullfilment || wc[0].inventory) {
       this.recurringFeeData.nonEdiFormattedFees[3].quantity = count;
       this.recurringFeeData.nonEdiFormattedFees[3].price = price * this.convertedCurrency;
       this.recurringFeeData.nonEdiFormattedFees[3].afterDiscountPrice = price * this.convertedCurrency;
+    } else {
+      this.recurringFeeData.nonEdiFormattedFees[3].quantity = 0;
+      this.recurringFeeData.nonEdiFormattedFees[3].price = 0;
+      this.recurringFeeData.nonEdiFormattedFees[3].afterDiscountPrice = 0;
     }
   }
 
   //Recurring Fees - NON EDI Formatted Fees - 	Ecommerce Web Site Traffic - 5 - array 4
   addNonEdiFormattedFees5() {
     let asc = this.ecommerceData.filter(a => a.name == "Amazon Seller Central");
-    let count = asc[0].orders ? 1 : 0;
+    let count = 0;
+    count = asc[0].orders ? 1 : 0;
     count += asc[0].payment ? 1 : 0;
     count += asc[0].product ? 1 : 0;
     count += asc[0].fullfilment ? 1 : 0;
     count += asc[0].inventory ? 1 : 0;
 
-    let price;
+    let price = 0;
+    let fee = this.communityManagementFeesData.filter(a => a.Name == "Amazon Seller Central")[0].Fee;
+    let aFee = this.communityManagementFeesData.filter(a => a.Name == "Ecommerce Additional Fees")[0].Fee;
     if (count == 0)
       price = 0;
     else if (count == 1)
-      price = 250;
+      price = fee;
     else if (count > 1)
-      price = 250 + ((count - 1) * 50);
+      price = fee + ((count - 1) * aFee);
 
     if (asc[0].orders || asc[0].payment || asc[0].product || asc[0].fullfilment || asc[0].inventory) {
       this.recurringFeeData.nonEdiFormattedFees[4].quantity = count;
       this.recurringFeeData.nonEdiFormattedFees[4].price = price * this.convertedCurrency;
       this.recurringFeeData.nonEdiFormattedFees[4].afterDiscountPrice = price * this.convertedCurrency;
+    } else {
+      this.recurringFeeData.nonEdiFormattedFees[4].quantity = 0;
+      this.recurringFeeData.nonEdiFormattedFees[4].price = 0;
+      this.recurringFeeData.nonEdiFormattedFees[4].afterDiscountPrice = 0;
     }
   }
 
@@ -1802,8 +2216,10 @@ export class HomeComponent implements OnInit {
     this.isCompliance = false;
     this.isProvideLabel = false;
     this.isHubPaying = false;
+    this.noTPInScope = 0;
+    this.contractMonths = 0;
     this.ecommerceData = [
-      { "name": "Magneto", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
+      { "name": "Magento", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
       { "name": "Shopify", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
       { "name": "Woo Commerce", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false },
       { "name": "Amazon Seller Central", "orders": false, "product": false, "fullfilment": false, "inventory": false, "payment": false }
@@ -1817,14 +2233,17 @@ export class HomeComponent implements OnInit {
     this.isAdditionalTab = true;
     if (e.checked && index == 1) {
       this.additionServiceTab1 = false;
-      this.addAdminAndManagementService(250, 250, 1);
+      let fee = this.communityManagementFeesData.filter(a => a.Name == "DiPulse Set Up Fee")[0].Fee;
+      this.addAdminAndManagementService(fee, fee, 1);
     } else if (!e.checked && index == 1) {
       this.additionServiceTab1 = true;
       this.noDiPulseIdNeeded = 0;
+      this.addMSPAdditionalUserAccount(0, 0);
       this.addAdminAndManagementService(0, 0, 0);
     } else if (e.checked && index == 2) {
       this.additionServiceTab2 = false;
-      this.addDimetricsSetup(5000, 1, 5000);
+      let fee = this.communityManagementFeesData.filter(a => a.Name == "Dimetrics Setup")[0].Fee;
+      this.addDimetricsSetup(fee, 1, fee);
       this.addMSPDimetrics();
     } else if (!e.checked && index == 2) {
       this.additionServiceTab2 = true;
@@ -1834,15 +2253,24 @@ export class HomeComponent implements OnInit {
       this.isDiMetricsHost = false;
       this.noKBHostedEachMonth = 0;
       this.addMSPDimetrics();
+      this.emptyDimetricsOtherTable();
     } else if (e.checked && index == 3) {
       this.additionServiceTab3 = false;
-      this.addServiceBureauSetup(500, 1, 500);
-      if (this.noDocServiceBureauUsers > 1) {
-        let price = 200 * (this.noDocServiceBureauUsers - 1);
-        this.addServiceBureauSetupAdditionalDoc(200, (this.noDocServiceBureauUsers - 1), price);
-      }
+      let fee = this.communityManagementFeesData.filter(a => a.Name == "Service Bureau 1st Document Build")[0].Fee;
+      this.addServiceBureauSetup(fee, 1, fee);
     } else if (!e.checked && index == 3) {
       this.additionServiceTab3 = true;
+      this.noDocServiceBureauUsers = 0;
+      this.sponsorPayingServiceBureauUsers = 'No';
+      this.serviceBureauUsersInProject = 0;
+      this.docsPerMonth = 0;
+      this.docs856PerMonth = 0;
+      this.lineItemsPerMonth = 0;
+      this.labelsServiceBureauUsersPerMonth = 0;
+      this.editServiceBureauDocs1(0, 0);
+      this.editServiceBureauDocs2(0, 0);
+      this.editServiceBureauDocs3(0, 0);
+      this.editServiceBureauDocs4(0, 0);
       this.addServiceBureauSetup(0, 0, 0);
       this.addServiceBureauSetupAdditionalDoc(0, 0, 0);
     } else if (e.checked && index == 4) {
@@ -1869,27 +2297,43 @@ export class HomeComponent implements OnInit {
     this.communicationSoftware = false;
     this.onsiteProfessionalServices = false;
     this.isAdditionalTab = false;
+
     this.additionServiceTab1 = true;
     this.noDiPulseIdNeeded = 0;
+    this.addMSPAdditionalUserAccount(0, 0);
     this.addAdminAndManagementService(0, 0, 0);
+
     this.additionServiceTab2 = true;
-    this.addDimetricsSetup(0, 0, 0);
     this.noBusinessRules = 0;
     this.noDocUsedInBusinessRules = 0;
     this.isDiMetricsHost = false;
     this.noKBHostedEachMonth = 0;
-    this.noTPInScope = 0;
     this.addMSPDimetrics();
+    this.emptyDimetricsOtherTable();
+    this.addDimetricsSetup(0, 0, 0);
+
     this.additionServiceTab3 = true;
+    this.noDocServiceBureauUsers = 0;
+    this.sponsorPayingServiceBureauUsers = 'No';
+    this.serviceBureauUsersInProject = 0;
+    this.docsPerMonth = 0;
+    this.docs856PerMonth = 0;
+    this.lineItemsPerMonth = 0;
+    this.labelsServiceBureauUsersPerMonth = 0;
+    this.editServiceBureauDocs1(0, 0);
+    this.editServiceBureauDocs2(0, 0);
+    this.editServiceBureauDocs3(0, 0);
+    this.editServiceBureauDocs4(0, 0);
     this.addServiceBureauSetup(0, 0, 0);
     this.addServiceBureauSetupAdditionalDoc(0, 0, 0);
+
     this.additionServiceTab4 = true;
     this.addProtocol('', 0, 0);
     this.addSoftware('', 0, 0);
+
     this.additionServiceTab5 = true;
     this.howManyHoursNeeded = 0;
     this.addDiCentralHours(0, 0);
-    this.contractMonths = 0;
   }
 
   //One Time Fees - Administrative and Management Services - DiPulse Master - 1 - array 0
@@ -1909,30 +2353,30 @@ export class HomeComponent implements OnInit {
   }
 
   noDiPulseIdNeededChange(e) {
-    if (this.noDiPulseIdNeeded > 0) {
-      this.addMSPAdditionalUserAccount(20, this.noDiPulseIdNeeded)
+    if (e.target.value > 0) {
+      this.addMSPAdditionalUserAccount(this.communityManagementFeesData.filter(a => a.Name == "DiPulse Additional ID Fee")[0].Fee, e.target.value)
     } else {
       this.addMSPAdditionalUserAccount(0, 0);
     }
   }
 
   noBusinessRulesChange(e) {
-    if (this.noBusinessRules == 0)
+    if (e.target.value == 0)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'A Business Rule is needed' });
-    else if (this.noBusinessRules > 26)
+    else if (e.target.value > 26)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'A Business Rule should not be greater than 26' });
 
-    if (this.noBusinessRules > 0)
+    if (e.target.value > 0)
       this.addMSPDimetrics();
   }
 
   noDocUsedInBusinessRulesChange(e) {
-    if (this.noDocUsedInBusinessRules > this.totalEdiDocs)
+    if (e.target.value > this.totalEdiDocs)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'ERROR TOO many Documents' });
-    else if (this.noDocUsedInBusinessRules > 10)
+    else if (e.target.value > 10)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents used in Business Rule should not be greater than 10' });
 
-    if (this.noDocUsedInBusinessRules > 0)
+    if (e.target.value > 0)
       this.addMSPDimetrics();
   }
 
@@ -1946,10 +2390,10 @@ export class HomeComponent implements OnInit {
   }
 
   noKBHostedEachMonthChange(e) {
-    if (this.noKBHostedEachMonth > 0 && this.noKBHostedEachMonth <= 10000)
+    if (e.target.value > 0 && e.target.value <= 10000)
       this.addDimetricsOtherTable();
     else {
-      if (this.noKBHostedEachMonth > 10000)
+      if (e.target.value > 10000)
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of KB hosted each month should not be greater than 10000' });
 
       this.emptyDimetricsOtherTable();
@@ -1957,20 +2401,22 @@ export class HomeComponent implements OnInit {
   }
 
   noTPInScopeChange(e) {
-    if (this.noEdiDocs > 0) {
-      let loop : any[] = this.ediLoop;
-      this.maxEDITpNo = loop.sort((a, b) => a.noOfTP - b.noOfTP).reverse()[0].noOfTP;
+    let fee = this.communityManagementFeesData.filter(a => a.Name == "Trading Community")[0].Fee;
+    if (e.target.value > 0) {
+      this.maxEDITpNo = Math.max(...this.ediLoop.map(d => d.noOfTP))
       if (e.target.value < this.maxEDITpNo) {
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Enter a number equal or higher than the max of the tps per doc' });
-        this.addMSPTradingCommunity(15, 0);
+        this.addMSPTradingCommunity(fee, 0);
       }
-      else{
-        this.addMSPTradingCommunity(15, e.target.value);
+      else {
+        this.addMSPTradingCommunity(fee, e.target.value);
         this.addTradingPartnerEnable(e.target.value);
       }
-    } else{
+      this.addProjectManagement();
+    } else {
       this.noTPInScope = 0;
-      this.addMSPTradingCommunity(15, 0);
+      this.addProjectManagement();
+      this.addMSPTradingCommunity(fee, 0);
       this.addTradingPartnerEnable(0);
     }
   }
@@ -1990,7 +2436,7 @@ export class HomeComponent implements OnInit {
       let fee = this.diMetricsSecondPartData.filter(a => a.Complexity == complexity[0].Complexity);
       let up;
       for (let i = 0; i < fee.length; i++) {
-        if (this.totalEdiDocs <= fee[i].TradingPartnerCommunitySize) {
+        if (this.noTPInScope <= fee[i].TradingPartnerCommunitySize) {
           up = fee[i].Fee;
           this.recurringFeeData.monthlySupportService[3].unitPrice = up * this.convertedCurrency;
           this.recurringFeeData.monthlySupportService[3].price = up * this.convertedCurrency;
@@ -1999,36 +2445,19 @@ export class HomeComponent implements OnInit {
           break;
         }
       }
+    } else {
+      this.recurringFeeData.monthlySupportService[3].unitPrice = 0;
+      this.recurringFeeData.monthlySupportService[3].price = 0;
+      this.recurringFeeData.monthlySupportService[3].quantity = 0;
+      this.recurringFeeData.monthlySupportService[3].afterDiscountPrice = 0;
     }
   }
 
   //Recurring Fees - Other -Custom Tables - 1 -array 0
   addDimetricsOtherTable() {
-    let fee;
-    if (this.noKBHostedEachMonth > 0 && this.noKBHostedEachMonth <= 100)
-      fee = 20;
-    else if (this.noKBHostedEachMonth >= 101 && this.noKBHostedEachMonth <= 500)
-      fee = 30;
-    else if (this.noKBHostedEachMonth >= 501 && this.noKBHostedEachMonth <= 1000)
-      fee = 40;
-    else if (this.noKBHostedEachMonth >= 1001 && this.noKBHostedEachMonth <= 2000)
-      fee = 50;
-    else if (this.noKBHostedEachMonth >= 2001 && this.noKBHostedEachMonth <= 3000)
-      fee = 52;
-    else if (this.noKBHostedEachMonth >= 3001 && this.noKBHostedEachMonth <= 4000)
-      fee = 54;
-    else if (this.noKBHostedEachMonth >= 4001 && this.noKBHostedEachMonth <= 5000)
-      fee = 56;
-    else if (this.noKBHostedEachMonth >= 5001 && this.noKBHostedEachMonth <= 6000)
-      fee = 58;
-    else if (this.noKBHostedEachMonth >= 6001 && this.noKBHostedEachMonth <= 7000)
-      fee = 60;
-    else if (this.noKBHostedEachMonth >= 7001 && this.noKBHostedEachMonth <= 8000)
-      fee = 61;
-    else if (this.noKBHostedEachMonth >= 8001 && this.noKBHostedEachMonth <= 9000)
-      fee = 62;
-    else if (this.noKBHostedEachMonth >= 9001 && this.noKBHostedEachMonth <= 10000)
-      fee = 63;
+    let fee = 0;
+    if (this.noKBHostedEachMonth > 0)
+      fee = this.diametricsThirdPartData.filter(a => a.Min <= this.noKBHostedEachMonth && a.Max >= this.noKBHostedEachMonth)[0].Fee;
 
     this.recurringFeeData.other[0].unitPrice = fee * this.convertedCurrency;
     this.recurringFeeData.other[0].price = fee * this.convertedCurrency;
@@ -2036,6 +2465,7 @@ export class HomeComponent implements OnInit {
     this.recurringFeeData.other[0].afterDiscountPrice = fee * this.convertedCurrency;
   }
 
+  //Recurring Fees - Other -Custom Tables - 1 -array 0
   emptyDimetricsOtherTable() {
     this.recurringFeeData.other[0].unitPrice = 0;
     this.recurringFeeData.other[0].price = 0;
@@ -2044,8 +2474,17 @@ export class HomeComponent implements OnInit {
   }
 
   noDocServiceBureauUsersChange(e) {
-    if (this.noDocServiceBureauUsers == 0)
+    if (e.target.value == 0)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'ERROR- Need Document Count for Service Bureau' });
+    else {
+      if (e.target.value > 1) {
+        let fee1 = this.communityManagementFeesData.filter(a => a.Name == "Setup Additional Doc")[0].Fee;
+        let price = fee1 * (e.target.value - 1);
+        this.addServiceBureauSetupAdditionalDoc(fee1, (e.target.value - 1), price);
+      } else {
+        this.addServiceBureauSetupAdditionalDoc(0, 0, 0);
+      }
+    }
   }
 
   //One Time Fees - Other - Service Bureau 1st Document Build - 2 - array 1
@@ -2090,14 +2529,24 @@ export class HomeComponent implements OnInit {
   }
 
   sponsorPayingServiceBureauUsersChange(e) {
-
+    if (e == 'No') {
+      this.serviceBureauUsersInProject = 0;
+      this.docsPerMonth = 0;
+      this.docs856PerMonth = 0;
+      this.lineItemsPerMonth = 0;
+      this.labelsServiceBureauUsersPerMonth = 0;
+      this.editServiceBureauDocs1(0, 0);
+      this.editServiceBureauDocs2(0, 0);
+      this.editServiceBureauDocs3(0, 0);
+      this.editServiceBureauDocs4(0, 0);
+    }
   }
 
   docsPerMonthChange(e) {
-    if (this.docsPerMonth >= 4000)
+    if (e.target.value >= 4000)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents (850, 810, 855, 865) per month should not be greater than 3999' });
     else {
-      if (this.docsPerMonth > 0)
+      if (e.target.value > 0)
         this.addServiceBureauDocs1();
       else
         this.editServiceBureauDocs1(0, 0);
@@ -2106,16 +2555,10 @@ export class HomeComponent implements OnInit {
 
   //Recurring Fees - Monthly Support Service - Service Bureau - 1 -array 0
   addServiceBureauDocs1() {
-    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Documents (850, 810, 855, 865)");
-    let up;
-    for (let i = 0; i < doc.length; i++) {
-      if (this.docsPerMonth >= doc[i].Min && this.docsPerMonth <= doc[i].Max) {
-        up = doc[i].Fee;
-        let qty = this.docsPerMonth + this.serviceBureauUsersInProject;
-        this.editServiceBureauDocs1(up, qty)
-        break;
-      }
-    }
+    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Documents (850, 810, 855, 865)" && a.Min <= this.docsPerMonth && a.Max >= this.docsPerMonth);
+    let up = doc.length > 0 ? doc[0].Fee : 0;
+    let qty = this.docsPerMonth * this.serviceBureauUsersInProject;
+    this.editServiceBureauDocs1(up, qty)
   }
 
   editServiceBureauDocs1(unitPrice, qty) {
@@ -2126,10 +2569,10 @@ export class HomeComponent implements OnInit {
   }
 
   docs856PerMonthChange(e) {
-    if (this.docs856PerMonth >= 4000)
+    if (e.target.value >= 4000)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Documents (856) per month should not be greater than 3999' });
     else {
-      if (this.docs856PerMonth > 0)
+      if (e.target.value > 0)
         this.addServiceBureauDocs2();
       else
         this.editServiceBureauDocs2(0, 0);
@@ -2138,16 +2581,10 @@ export class HomeComponent implements OnInit {
 
   //Recurring Fees - Monthly Support Service - Service Bureau - 2 -array 1
   addServiceBureauDocs2() {
-    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Documents (856)");
-    let up;
-    for (let i = 0; i < doc.length; i++) {
-      if (this.docs856PerMonth >= doc[i].Min && this.docs856PerMonth <= doc[i].Max) {
-        up = doc[i].Fee;
-        let qty = this.docs856PerMonth + this.serviceBureauUsersInProject;
-        this.editServiceBureauDocs2(up, qty)
-        break;
-      }
-    }
+    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Documents (856)" && a.Min <= this.docs856PerMonth && a.Max >= this.docs856PerMonth);
+    let up = doc.length > 0 ? doc[0].Fee : 0;
+    let qty = this.docs856PerMonth * this.serviceBureauUsersInProject;
+    this.editServiceBureauDocs2(up, qty);
   }
 
   editServiceBureauDocs2(unitPrice, qty) {
@@ -2158,10 +2595,10 @@ export class HomeComponent implements OnInit {
   }
 
   lineItemsPerMonthChange(e) {
-    if (this.lineItemsPerMonth >= 4000)
+    if (e.target.value >= 4000)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Monthly Line Items for all Users should not be greater than 3999' });
     else {
-      if (this.lineItemsPerMonth > 0)
+      if (e.target.value > 0)
         this.addServiceBureauDocs3();
       else
         this.editServiceBureauDocs3(0, 0);
@@ -2170,17 +2607,9 @@ export class HomeComponent implements OnInit {
 
   //Recurring Fees - Monthly Support Service - Service Bureau - 3 -array 2
   addServiceBureauDocs3() {
-    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Line Items");
-    let up;
-    for (let i = 0; i < doc.length; i++) {
-      if (this.lineItemsPerMonth >= doc[i].Min && this.lineItemsPerMonth <= doc[i].Max) {
-        up = doc[i].Fee;
-        let qty = this.lineItemsPerMonth;
-        this.editServiceBureauDocs3(up, qty);
-        break;
-      }
-    }
-
+    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Line Items" && a.Min <= this.lineItemsPerMonth && a.Max >= this.lineItemsPerMonth);
+    let up = doc.length > 0 ? doc[0].Fee : 0;
+    this.editServiceBureauDocs3(up, this.lineItemsPerMonth);
   }
 
   editServiceBureauDocs3(unitPrice, qty) {
@@ -2191,10 +2620,10 @@ export class HomeComponent implements OnInit {
   }
 
   labelsServiceBureauUsersPerMonthChange(e) {
-    if (this.labelsServiceBureauUsersPerMonth >= 4000)
+    if (e.target.value >= 4000)
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Labels are the Service Bureau users planning per month should not be greater than 3999' });
     else {
-      if (this.labelsServiceBureauUsersPerMonth > 0)
+      if (e.target.value > 0)
         this.addServiceBureauDocs4();
       else
         this.editServiceBureauDocs4(0, 0);
@@ -2203,16 +2632,9 @@ export class HomeComponent implements OnInit {
 
   //Recurring Fees - Monthly Support Service - Service Bureau - 4 -array 3
   addServiceBureauDocs4() {
-    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Labels (does not include shipping costs)");
-    let up;
-    for (let i = 0; i < doc.length; i++) {
-      if (this.labelsServiceBureauUsersPerMonth >= doc[i].Min && this.labelsServiceBureauUsersPerMonth <= doc[i].Max) {
-        up = doc[i].Fee;
-        let qty = this.labelsServiceBureauUsersPerMonth;
-        this.editServiceBureauDocs4(up, qty);
-        break;
-      }
-    }
+    let doc = this.serviceBureauFeesData.filter(a => a.Item == "Labels (does not include shipping costs)" && a.Min <= this.labelsServiceBureauUsersPerMonth && a.Max >= this.labelsServiceBureauUsersPerMonth);
+    let up = doc.length > 0 ? doc[0].Fee : 0;
+    this.editServiceBureauDocs4(up, this.labelsServiceBureauUsersPerMonth);
   }
 
   editServiceBureauDocs4(unitPrice, qty) {
@@ -2225,9 +2647,9 @@ export class HomeComponent implements OnInit {
   identifyTheSwYesChange(e) {
     let up;
     if (this.identifyTheSwYes == "DiConnect Lite")
-      up = 500;
+      up = this.communicationFeesData.filter(a => a.Name == "DiConnect Lite")[0].Fee;
     else if (this.identifyTheSwYes == "DiConnect Enterprice")
-      up = 1000;
+      up = this.communicationFeesData.filter(a => a.Name == "DiConnect Enterprise")[0].Fee;
     else
       up = 0;
     this.addSoftware(this.identifyTheSwYes, up, 1)
@@ -2236,15 +2658,15 @@ export class HomeComponent implements OnInit {
   protocolConnectToDicenterChange(e) {
     let up;
     if (this.protocolConnectToDicenter == "AS2")
-      up = 350;
+      up = this.communicationFeesData.filter(a => a.Name == "AS2")[0].Fee;
     else if (this.protocolConnectToDicenter == "FTP")
-      up = 250;
+      up = this.communicationFeesData.filter(a => a.Name == "FTP")[0].Fee;
     else if (this.protocolConnectToDicenter == "SFTP")
-      up = 1000;
+      up = this.communicationFeesData.filter(a => a.Name == "SFTP")[0].Fee;
     else if (this.protocolConnectToDicenter == "FTP/s")
-      up = 500;
+      up = this.communicationFeesData.filter(a => a.Name == "FTP/S")[0].Fee;
     else if (this.protocolConnectToDicenter == "Web Services")
-      up = 1000;
+      up = this.communicationFeesData.filter(a => a.Name == "Web Services")[0].Fee;
     this.addProtocol(this.protocolConnectToDicenter, up, 1)
   }
 
@@ -2267,8 +2689,8 @@ export class HomeComponent implements OnInit {
   }
 
   howManyHoursNeededChange(e) {
-    if (this.howManyHoursNeeded > 0)
-      this.addDiCentralHours(150, this.howManyHoursNeeded);
+    if (e.target.value > 0)
+      this.addDiCentralHours(this.communityManagementFeesData.filter(a => a.Name == "DiCentral hours")[0].Fee, this.howManyHoursNeeded);
     else
       this.addDiCentralHours(0, 0);
   }
@@ -2283,8 +2705,9 @@ export class HomeComponent implements OnInit {
 
   dicountChange(e, index, id) {
     let value = e.target.value;
-    if (value > 30) {
-      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Discount cannot exceed 30%. You need to get approval from Steve Scala.' });
+    if (value > this.discountData[0].Discount) {
+      let msg = 'Discount cannot exceed ' + this.discountData[0].Discount + '%. You need to get approval from Steve Scala.'
+      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: msg });
       this.setDisountValue(index, id);
     } else {
       if (value > 0 && value != '') {
@@ -2401,11 +2824,14 @@ export class HomeComponent implements OnInit {
       window.location.reload();
     }
   }
+
+
 }
 
 @Component({
   selector: 'user-dialog',
   templateUrl: 'userDialog.html',
+  providers: [MessageService, HomeService],
 })
 export class DialogOverviewExampleDialog {
   form: FormGroup = new FormGroup({
@@ -2418,9 +2844,17 @@ export class DialogOverviewExampleDialog {
     customerName: new FormControl('', [Validators.required]),
     currency: new FormControl('USD', [Validators.required]),
   });
+
+  form1: FormGroup = new FormGroup({
+    reportId: new FormControl('', Validators.required)
+  });
+  isFirstEntry = true;
+  isExisting = false;
+  isNew = false;
+
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData) {
+    @Inject(MAT_DIALOG_DATA) public data: DialogData, private service: HomeService, private messageService: MessageService) {
     this.form.controls['userName'].setValue(this.data.name);
     this.form.controls['email'].setValue(this.data.email);
     this.form.controls['dealId'].setValue(this.data.dealId);
@@ -2440,8 +2874,48 @@ export class DialogOverviewExampleDialog {
       this.data.dealId = form.dealId;
       this.data.customerName = form.customerName;
       this.data.currency = form.currency;
+      this.data.reportId = '';
+      this.data.userId = 0;
       this.onNoClick();
     }
   }
+
+  firstEntry(type) {
+    this.isFirstEntry = false;
+    if (type == 'new') {
+      this.isNew = true;
+      this.isExisting = false;
+    } else {
+      this.isNew = false;
+      this.isExisting = true;
+    }
+  }
+
+  goBack() {
+    this.form.reset();
+    this.isFirstEntry = true;
+    this.isNew = false;
+    this.isExisting = false;
+  }
+
+  submit1() {
+    let form1 = this.form1.value;
+    this.service.getReportDetails(form1.reportId)
+      .subscribe(data => {
+        if (data == null)
+          this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Quotation details not available.Please enter valid Quotation number' });
+        else {
+          this.data.name = data.Name;
+          this.data.email = data.Email;
+          this.data.dealId = data.DealId;
+          this.data.customerName = data.CustomerName;
+          this.data.currency = data.Currency;
+          this.data.reportId = data.ReportId;
+          this.data.userId = data.Id;
+          this.onNoClick();
+        }
+      });
+  }
+
 
 }

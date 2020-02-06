@@ -15,6 +15,7 @@ export interface EdiDocs {
 export class EdiDocsComponent implements OnInit {
   cols: any[];
   ediDocsData: any[] = [];
+  finalediDocsData: any[] = [];
   displayDialog: boolean;
   ediDocs: EdiDocs = {};
   selectedEdiDocs: EdiDocs;
@@ -36,6 +37,7 @@ export class EdiDocsComponent implements OnInit {
     this.service.getAllEdi()
       .subscribe(data => {
         this.ediDocsData = data;
+        this.finalediDocsData = data;
       });
   }
 
@@ -45,12 +47,13 @@ export class EdiDocsComponent implements OnInit {
         .subscribe(data1 => {
           let index = this.ediDocsData.indexOf(this.selectedEdiDocs);
           this.ediDocsData = this.ediDocsData.filter((val, i) => i != index);
+          this.finalediDocsData = this.finalediDocsData.filter((val, i) => i != index);
           this.ediDocs = null;
           this.displayDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record deleted Successfully' });
-          this.service.addLogs('EdiDocs', this.selectedEdiDocs.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete')
-          .subscribe(l => {
-          });
+          this.service.addLogs('EdiDocs', this.selectedEdiDocs.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Delete', this.selectedEdiDocs, null)
+            .subscribe(l => {
+            });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
@@ -83,22 +86,24 @@ export class EdiDocsComponent implements OnInit {
       this.service.addEdi(this.ediDocs)
         .subscribe(data1 => {
           this.ediDocsData.push(data1);
+          this.finalediDocsData.push(data1);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added Successfully' });
-          this.service.addLogs('EdiDocs', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add')
-          .subscribe(l => {
-          });
+          this.service.addLogs('EdiDocs', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Add', null, data1)
+            .subscribe(l => {
+            });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });
     }
     else {
+      let old = this.finalediDocsData.filter(a => a.Id == this.ediDocs.Id)
       this.service.updateEdi(this.ediDocs)
         .subscribe(data1 => {
           erps[this.ediDocsData.indexOf(this.selectedEdiDocs)] = data1;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated Successfully' });
-          this.service.addLogs('EdiDocs', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update')
-          .subscribe(l => {
-          });
+          this.service.addLogs('EdiDocs', data1.Id, localStorage.getItem('name'), localStorage.getItem('userId'), 'Update', old[0], data1)
+            .subscribe(l => {
+            });
         }, err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.Message });
         });

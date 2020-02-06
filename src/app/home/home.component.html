@@ -226,7 +226,8 @@
                                 </div>
                             </div>
                             <div class="row mb-2 m-0">
-                                <label class="col-md-4 p-1">Enter the number of trading partners on scope</label>
+                                <label class="col-md-4 p-1">Enter the number of trading partners under EDI on
+                                    scope</label>
                                 <div class="col-md-8 p-1">
                                     <input [(ngModel)]="noTPInScope" type="number" class="form-control col-md-6 p-1"
                                         (keyup)="noTPInScopeChange($event)" min="0">
@@ -241,8 +242,11 @@
                                                 <mat-radio-button class="pr-2" value="MS KB Plan">MS
                                                     KB Plan
                                                 </mat-radio-button>
-                                                <mat-radio-button value="Drop Ship Volume Plan">Drop
+                                                <mat-radio-button class="pr-2" value="Drop Ship Volume Plan">Drop
                                                     Ship Volume Plan
+                                                </mat-radio-button>
+                                                <mat-radio-button value="No Plan">
+                                                    No Plan
                                                 </mat-radio-button>
                                             </mat-radio-group>
                                         </div>
@@ -361,7 +365,7 @@
 
                             </div>
                             <div class="row">
-                                <div class="col-md-12 p-0 table-responsive">
+                                <div class="col-md-12 table-responsive">
                                     <table *ngIf="isEcommerceTable" class="table table-bordered table-sm table-striped">
                                         <thead>
                                             <tr>
@@ -468,7 +472,7 @@
                             <div class="form-check form-check-inline">
                                 <mat-checkbox class="mr-1 mt-2" (change)="addServices($event,5)"
                                     [(ngModel)]="onsiteProfessionalServices">
-                                </mat-checkbox>Onsite Professional Services
+                                </mat-checkbox>Professional Services
                             </div>
                         </div>
                     </div>
@@ -484,19 +488,25 @@
                             </p-tabPanel>
                             <p-tabPanel header="DiMetrics" *ngIf="!additionServiceTab2">
                                 <div class="row mb-2 m-0">
-                                    <p class="p-1">Enter the number of Business Rules</p>
+                                    <p class="p-1">Enter the existing number of Business Rules (If there is a need of
+                                        new dimetrics business rules, please use professional services tab)
+                                        <!-- <i
+                                            class="fa fa-2x fa-info-circle"
+                                            pTooltip="If there is a need of new dimetrics business rules, please use professional services tab"
+                                            tooltipPosition="top"></i> -->
+                                    </p>
                                     <input [(ngModel)]="noBusinessRules" (keyup)="noBusinessRulesChange($event)"
                                         type="number" class="form-control col-2 p-1" min="0">
                                 </div>
                                 <div class="row mb-2 m-0">
-                                    <p class="p-1">Number of Documents used in Business Rules</p>
+                                    <p class="p-1">Number of Documents used in existing Business Rules </p>
                                     <input [(ngModel)]="noDocUsedInBusinessRules"
                                         (keyup)="noDocUsedInBusinessRulesChange($event)" type="number"
                                         class="form-control col-2 p-1" min="0">
                                 </div>
                                 <div class="row mb-2 m-0 p-1">
                                     <div class="form-check form-check-inline">
-                                        Should DiMetrics host any customer files administered by customer
+                                        Should DiMetrics host any customer files administered by customers
                                         <mat-checkbox class="ml-1 mt-2" (change)="isDiMetricsHostChange($event)"
                                             [(ngModel)]="isDiMetricsHost">
                                         </mat-checkbox>
@@ -582,7 +592,9 @@
                                     </select>
                                 </div>
                             </p-tabPanel>
-                            <p-tabPanel header="Onsite Professional Services" *ngIf="!additionServiceTab5">
+                            <p-tabPanel header="Professional Services" rightIcon="pi pi-star"
+                                tooltip="Need to fill this number with colloboration with EVP of professional services"
+                                *ngIf="!additionServiceTab5">
                                 <div class="row mb-2 m-0">
                                     <p class="p-1 ">How many hours are needed on the site?</p>
                                     <input [(ngModel)]="howManyHoursNeeded" (keyup)="howManyHoursNeededChange($event)"
@@ -601,28 +613,28 @@
                         <div class="col-md-3">
                             <button [class.active]="isOneTimeFee" class="btn btn-outline-info btn-sm"
                                 (click)="getFee(1)">One Time Fees</button><br>
-                            <div class="input-group m-auto pt-3 w-50">
+                            <div class="input-group m-auto pt-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">{{currency}}</span>
                                 </div>
-                                <input value="{{ 0 + getTotalOneTimeFee(oneTimeFeeData)}}" type="number"
-                                    class="form-control" readonly>
+                                <input value="{{ 0 + getTotalOneTimeFee(oneTimeFeeData) | round}}" type="number"
+                                    class="form-control" readonly step="0.01">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <button [class.active]="isRecurringFee" class="btn btn-outline-info btn-sm"
                                 (click)="getFee(2)">Recurring Fees</button>
-                            <div class="input-group m-auto pt-3 w-50">
+                            <div class="input-group m-auto pt-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">{{currency}}</span>
                                 </div>
-                                <input value="{{ 0 + getTotalRecurringFee(recurringFeeData)}}" type="number"
-                                    class="form-control" readonly>
+                                <input value="{{ 0 + getTotalRecurringFee(recurringFeeData) | round}}" type="number"
+                                    class="form-control" readonly step="0.01">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <h5> Contract Period</h5>
-                            <div class="input-group m-auto pt-3 w-50">
+                            <div class="input-group m-auto pt-3">
                                 <input [(ngModel)]="contractMonths" value="0" type="number" class="form-control"
                                     readonly>
                                 <div class="input-group-prepend">
@@ -632,13 +644,13 @@
                         </div>
                         <div class="col-md-3">
                             <h5>Total Contract Value (TCV)</h5>
-                            <div class="input-group m-auto pt-3 w-50">
+                            <div class="input-group m-auto pt-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">{{currency}}</span>
                                 </div>
                                 <input
-                                    value="{{(contractMonths * getTotalRecurringFee(recurringFeeData)) + getTotalOneTimeFee(oneTimeFeeData) }}"
-                                    type="number" class="form-control" readonly>
+                                    value="{{(contractMonths * getTotalRecurringFee(recurringFeeData)) + getTotalOneTimeFee(oneTimeFeeData) | round}}"
+                                    type="number" class="form-control" readonly step="0.01">
                             </div>
                         </div>
                     </div>
@@ -679,8 +691,7 @@
                                                 <input (keyup)="dicountChange($event,i,1)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -704,8 +715,7 @@
                                                 <input (keyup)="dicountChange($event,i,2)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -730,8 +740,7 @@
                                                 <input (keyup)="dicountChange($event,i,3)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -757,8 +766,7 @@
                                                 <input (keyup)="dicountChange($event,i,4)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -782,8 +790,7 @@
                                                 <input (keyup)="dicountChange($event,i,5)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -807,8 +814,7 @@
                                                 <input (keyup)="dicountChange($event,i,6)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -832,8 +838,7 @@
                                                 <input (keyup)="dicountChange($event,i,7)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -883,8 +888,7 @@
                                                 <input (keyup)="dicountChange($event,i,8)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -905,7 +909,7 @@
                                         <td>{{item.monthlyRecurringDeliverable}}</td>
                                         <td>{{item.instructions}}</td>
                                         <td class="text-center">{{item.unitPrice}}</td>
-                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-center">{{item.quantity | currency:currency}}</td>
                                         <td class="text-center">{{item.price | currency:currency}}</td>
                                         <td>
                                             <div *ngIf="item.discount != null" class="input-group input-group-sm">
@@ -915,8 +919,7 @@
                                                 <input (keyup)="dicountChange($event,i,9)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -940,8 +943,7 @@
                                                 <input (keyup)="dicountChange($event,i,10)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -954,7 +956,10 @@
                                         <td>{{item.item}}</td>
                                         <td>{{item.monthlyRecurringDeliverable}}</td>
                                         <td>{{item.instructions}}</td>
-                                        <td class="text-center">{{item.unitPrice | currency:currency}}</td>
+                                        <td class="text-center">
+                                            <span *ngIf="i != 0">{{item.unitPrice | currency:currency}}</span>
+                                            <span *ngIf="i == 0">{{item.unitPrice}}%</span>
+                                        </td>
                                         <td class="text-center">{{item.quantity}}</td>
                                         <td class="text-center">{{item.price | currency:currency}}</td>
                                         <td>
@@ -965,8 +970,7 @@
                                                 <input (keyup)="dicountChange($event,i,11)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -990,8 +994,7 @@
                                                 <input (keyup)="dicountChange($event,i,12)" type="number"
                                                     placeholder="Enter Discount" value="{{item.discount}}"
                                                     class="form-control" aria-label="%"
-                                                    aria-describedby="inputGroup-sizing-sm"
-                                                    onKeyPress="if(this.value.length==2) return false;">
+                                                    aria-describedby="inputGroup-sizing-sm">
                                             </div>
                                         </td>
                                         <td class="text-center">{{item.afterDiscountPrice | currency:currency}}</td>
@@ -1009,15 +1012,17 @@
                     <div class="pb-3 pr-5 pt-2 pl-5">
                         <button (click)="newReport()" class="btn btn-info float-left btn-sm">Generate New
                             Report</button>
-                        <button (click)="exportExcel()" class="btn btn-dark float-right"><i
+                        <button (click)="exportExcel()" class="btn btn-success float-right"><i
                                 class="fa fa-2x fa-file-excel-o"></i></button>
-                        <button (click)="downloadReport()" class="btn btn-success float-right mr-3"><i
+                        <button (click)="downloadReport()" class="btn btn-danger float-right mr-3"><i
                                 class="fa fa-2x fa-file-pdf-o"></i></button>
                     </div>
                     <div class="p-5">
                         <h4><i class="fa fa-calculator"></i> Final Price Calculation Report <span
                                 class="float-right">Date :
                                 {{todayDate | date:'short'}}</span></h4>
+                        <h5><span>Quotation No :
+                                {{reportId }}</span></h5>
                         <hr>
                         <div>
                             <table #finalReportId id="finalReportId" class="table table-bordered table-sm">
@@ -1239,7 +1244,7 @@
                                         <td>{{item.monthlyRecurringDeliverable}}</td>
                                         <td>{{item.instructions}}</td>
                                         <td>{{item.unitPrice}}</td>
-                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.quantity | currency:currency}}</td>
                                         <td>{{item.price | currency:currency}}</td>
                                         <td>{{item.discount}}%</td>
                                         <td>{{item.afterDiscountPrice | currency:currency}}</td>
@@ -1276,7 +1281,13 @@
                                         <td>{{item.item}}</td>
                                         <td>{{item.monthlyRecurringDeliverable}}</td>
                                         <td>{{item.instructions}}</td>
-                                        <td>{{item.unitPrice | currency:currency}}</td>
+                                        <td>
+                                            <span
+                                                *ngIf="item.monthlyRecurringDeliverable != 'Integration Service NON-EDI - surcharge'">{{item.unitPrice | currency:currency}}</span>
+                                            <span
+                                                *ngIf="item.monthlyRecurringDeliverable == 'Integration Service NON-EDI - surcharge'">{{item.unitPrice}}%</span>
+
+                                        </td>
                                         <td>{{item.quantity}}</td>
                                         <td>{{item.price | currency:currency}}</td>
                                         <td>{{item.discount}}%</td>

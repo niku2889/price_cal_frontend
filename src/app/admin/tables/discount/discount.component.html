@@ -2,7 +2,7 @@
 <div class="container">
     <div class="card mt-3">
         <div class="card-header">
-            <h5>Community Management Fees</h5>
+            <h5>Discount Limitation</h5>
         </div>
         <div class="card-body">
             <p-table #dt [columns]="cols" [value]="planData" selectionMode="single" [(selection)]="selectedPlan"
@@ -29,40 +29,29 @@
                         </td>
                     </tr>
                 </ng-template>
-                <ng-template pTemplate="summary" let-rowData>
+                <!-- <ng-template pTemplate="summary" let-rowData>
                     <div style="text-align:left">
                         <button type="button" class="btn btn-sm btn-info" (click)="showDialogToAdd()"><i
                                 class="fa fa-plus"></i>
                             Add</button>
                     </div>
-                </ng-template>
+                </ng-template> -->
             </p-table>
         </div>
     </div>
-    <p-dialog header="Plan Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
-        showEffect="fade" [modal]="true" [style]="{width: '400px'}" [autoZIndex]="false">
+    <p-dialog header="PM Fee Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
+        showEffect="fade" [modal]="true" [style]="{width: '600px'}" [autoZIndex]="false">
         <div class="ui-g ui-fluid" *ngIf="plan">
             <div class="ui-g-12 p-0">
-                <label class="font-weight-bold">Name</label>
-                <input class="form-control" [(ngModel)]="plan.Name" autofocus type="text" />
+                <label class="font-weight-bold">Dicount %</label>
+                <input class="form-control" [(ngModel)]="plan.Discount" autofocus type="number" />
             </div>
-            <div class="ui-g-12 p-0">
-                <label class="font-weight-bold"> Fee</label>
-                <input class="form-control" [(ngModel)]="plan.Fee" autofocus type="number" />
-            </div>
-            <div class="ui-g-12 p-0">
-                <label class="font-weight-bold"> Type</label>
-                <input class="form-control" [(ngModel)]="plan.Type" autofocus type="text" />
-            </div>
-            <div class="ui-g-12 p-0">
-                <label class="font-weight-bold"> Description</label>
-                <input class="form-control" [(ngModel)]="plan.Description" autofocus type="text" />
-            </div>
+
         </div>
         <p-footer>
             <div class="ui-dialog-buttonpane ui-helper-clearfix">
-                <button type="button" class="btn btn-sm btn-danger" (click)="delete()"><i
-                        class="fa fa-close"></i>Delete</button>
+                <!-- <button type="button" class="btn btn-sm btn-danger" (click)="delete()"><i
+                        class="fa fa-close"></i>Delete</button> -->
                 <button type="button" class="btn btn-sm btn-primary" (click)="save()"><i
                         class="fa fa-check"></i>Save</button>
             </div>

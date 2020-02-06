@@ -18,12 +18,14 @@ export class LogsComponent implements OnInit {
     if (this.isSA == false || this.isSA == 'false')
       this.permission = false;
     this.cols = [
-      { field: 'TableName', header: 'Table Name' },
-      { field: 'RowId', header: 'Row Id' },
-      { field: 'Date', header: 'Date' },
-      { field: 'UserName', header: 'User Name' },
-      { field: 'UserId', header: 'User Id' },
-      { field: 'OperationType', header: 'Action' },
+      { field: 'TableName', header: 'Table Name', width: 'auto' },
+      { field: 'RowId', header: 'Row Id', width: '5%' },
+      { field: 'Date', header: 'Date', width: 'auto' },
+      { field: 'UserName', header: 'User Name', width: 'auto' },
+      { field: 'UserId', header: 'User Id', width: '5%' },
+      { field: 'OperationType', header: 'Action', width: '8%' },
+      { field: 'OldValues', header: 'OldValues', width: '25%' },
+      { field: 'NewValues', header: 'NewValues', width: '25%' },
     ];
   }
 

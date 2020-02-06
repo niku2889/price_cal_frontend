@@ -41,16 +41,16 @@ export class AdminComponent implements OnInit, AfterViewInit {
           iconName: '',
           route: 'admin/dropshipvolumeplan',
         },
-        // {
-        //   displayName: 'COMMUNITY MANAGEMENT FEE',
-        //   iconName: '',
-        //   route: 'admin/admincmf',
-        // },
-        // {
-        //   displayName: 'COMMUNICATION FEE',
-        //   iconName: '',
-        //   route: 'admin/communicationfees',
-        // },
+        {
+          displayName: 'COMMUNITY MANAGEMENT FEE',
+          iconName: '',
+          route: 'admin/admincmf',
+        },
+        {
+          displayName: 'COMMUNICATION FEE',
+          iconName: '',
+          route: 'admin/communicationfees',
+        },
         {
           displayName: 'COMPLAINCE FEE',
           iconName: '',
@@ -65,6 +65,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
           displayName: 'DIAMETRICS FEE2',
           iconName: '',
           route: 'admin/diametricsfee2',
+        },
+        {
+          displayName: 'DIAMETRICS FEE3',
+          iconName: '',
+          route: 'admin/diametricsfee3',
         },
         {
           displayName: 'ECOMMERCE PROCESS',
@@ -86,6 +91,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
           iconName: '',
           route: 'admin/currencyconvertion',
         },
+        {
+          displayName: 'DISCOUNT LIMITATION',
+          iconName: '',
+          route: 'admin/discount',
+        },
       ]
     },
     {
@@ -103,6 +113,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
       iconName: 'history',
       route: 'admin/logs',
     },
+    
   ];
   constructor(private navService: NavService) {
     this.name = localStorage.getItem('name');

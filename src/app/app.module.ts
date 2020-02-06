@@ -65,7 +65,10 @@ import { TopNavComponent } from './admin/top-nav/top-nav.component';
 import { NavService } from './admin/nav.service';
 import { ReportsComponent } from './admin/reports/reports.component';
 import { LogsComponent } from './admin/logs/logs.component';
-import {TooltipModule} from 'primeng/tooltip';
+import { TooltipModule } from 'primeng/tooltip';
+import { DiscountComponent } from './admin/tables/discount/discount.component';
+import { DiametricsFee3Component } from './admin/tables/diametrics-fee3/diametrics-fee3.component';
+import { RoundPipe } from './home/roundPipe'
 
 @NgModule({
   declarations: [
@@ -93,7 +96,10 @@ import {TooltipModule} from 'primeng/tooltip';
     MenuListItemComponent,
     TopNavComponent,
     ReportsComponent,
-    LogsComponent
+    LogsComponent,
+    DiscountComponent,
+    DiametricsFee3Component,
+    RoundPipe
   ],
   imports: [
     BrowserModule,
