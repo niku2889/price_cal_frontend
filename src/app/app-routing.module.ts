@@ -23,6 +23,9 @@ import { ReportsComponent } from './admin/reports/reports.component';
 import { LogsComponent } from './admin/logs/logs.component';
 import { DiscountComponent } from './admin/tables/discount/discount.component';
 import { DiametricsFee3Component } from './admin/tables/diametrics-fee3/diametrics-fee3.component';
+import { ResetPasswordComponent } from './admin/reset-password/reset-password.component';
+import { ForgotPasswordComponent } from './admin/forgot-password/forgot-password.component';
+import { ManagePasswordComponent } from './admin/manage-password/manage-password.component';
 
 const routes: Routes = [
   {
@@ -55,9 +58,12 @@ const routes: Routes = [
       { path: 'reports', component: ReportsComponent, pathMatch: 'full' },
       { path: 'logs', component: LogsComponent, pathMatch: 'full' },
       { path: 'discount', component: DiscountComponent, pathMatch: 'full' },
+      { path: 'reset-password', component: ResetPasswordComponent, pathMatch: 'full' },
     ]
   },
   { path: 'login', component: AdminLoginComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'manage/password/:email/:token', component: ManagePasswordComponent },
   { path: '**', redirectTo: '' }
 ];
 

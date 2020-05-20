@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from "rxjs";
+import { environment } from '../../environments/environment.prod';
 
 @Injectable()
 export class HomeService {
 
-    //url: string = 'http://localhost:56201/api/';
-    url: string = 'http://niku281189-001-site1.itempurl.com/api/';
-
+    url: string =  environment.apiURL;
     constructor(private _http: HttpClient) {
     }
 

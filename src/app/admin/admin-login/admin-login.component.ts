@@ -13,7 +13,7 @@ import { MessageService } from 'primeng/api';
 export class AdminLoginComponent implements OnInit {
   signinForm: FormGroup;
   constructor(private service: AdminService,
-    private messageService: MessageService,private router: Router,) {
+    private messageService: MessageService, private router: Router, ) {
     localStorage.clear();
   }
 
@@ -28,27 +28,28 @@ export class AdminLoginComponent implements OnInit {
   signin() {
     const signinData = this.signinForm.value;
     this.service
-      .getAllAdminUsers()
+      .getValidateUsers(signinData.username, signinData.password)
       .subscribe(
         data => {
-          let loginResult: any[] = data;
-          let l = loginResult.filter(a => a.Name == signinData.username && a.Password == signinData.password)
-          if (l.length > 0) {
-            localStorage.setItem('login', 'true');
-            localStorage.setItem('userId', l[0].Id);
-            localStorage.setItem('superAdmin', l[0].IsSuperAdmin);
-            localStorage.setItem('name', l[0].Name);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Logged in successfully!' });
-            this.router.navigate(['/admin']);
-          }
+          if (data.error)
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: data.error.error_description });
           else {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid Login attempt' });
+            localStorage.setItem('login', 'true');
+            sessionStorage.setItem('token', data.access_token);
+            localStorage.setItem('userId', data.userId);
+            localStorage.setItem('name', data.userName);
+            localStorage.setItem('superAdmin', data.role == "SuperAdmin" ? 'true' : 'false');
+            this.router.navigate(['/admin']);
           }
         },
         error => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: error.Message });
         }
       );
+  }
+
+  forgotPassword(){
+    this.router.navigate(['/forgot-password']);
   }
 
 }

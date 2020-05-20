@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from "rxjs";
+import { environment } from '../../environments/environment.prod';
 
 export interface Car {
     vin?;
@@ -13,8 +14,10 @@ export interface Car {
 
 @Injectable()
 export class AdminService {
-    //url: string = 'http://localhost:56201/api/';
-    url: string = 'http://niku281189-001-site1.itempurl.com/api/';
+
+    url: string = environment.apiURL;
+    loginUrl: string = environment.loginUrl;
+
     constructor(private http: HttpClient) { }
 
     getCarsSmall() {
@@ -1057,13 +1060,36 @@ export class AdminService {
 
     //Admin Users
     getAllAdminUsers() {
+        var reqHeader = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+        });
         return Observable.create((observer) => {
-            return this.http.get(this.url + 'AdminUsers')
+            return this.http.get(this.url + 'AdminUsers', { headers: reqHeader })
                 .subscribe(data => {
                     observer.next(data);
                 },
                     err => {
                         console.error(err);
+                    });
+        });
+    }
+
+    getValidateUsers(username, password) {
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/x-www-form-urlencoded');
+
+        const body = new URLSearchParams();
+        body.set('username', username);
+        body.set('password', password);
+        body.set('grant_type', 'password');
+        return Observable.create((observer) => {
+            return this.http.post(this.loginUrl, body.toString(), { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
                     });
         });
     }
@@ -1096,15 +1122,93 @@ export class AdminService {
 
     addAdminUsers(user) {
         const body1 = JSON.stringify({
-            "Name": user.Name,
             "Email": user.Email,
             "Password": user.Password,
-            "IsSuperAdmin": false
+            "ConfirmPassword": user.Password
+        })
+        var reqHeader = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+        });
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'Account/Register', body1, { headers: reqHeader })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
+    resetPassword(OldPassword, NewPassword, ConfirmPassword) {
+        const body1 = JSON.stringify({
+            "OldPassword": OldPassword,
+            "NewPassword": NewPassword,
+            "ConfirmPassword": ConfirmPassword,
+        })
+        var reqHeader = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+        });
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'Account/ChangePassword', body1, { headers: reqHeader })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
+    forgotPassword(email) {
+        const body1 = JSON.stringify({
+            "Email": email,
         })
         let headers = new HttpHeaders();
         headers = headers.set('content-Type', 'application/json;charset=utf-8');
         return Observable.create((observer) => {
-            return this.http.post(this.url + 'AdminUsers', body1, { headers: headers })
+            return this.http.post(this.url + 'Account/ForgotPassword', body1, { headers: headers })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
+    deleteUser(id) {
+        const body1 = JSON.stringify({
+            "UserId": id,
+        })
+        var reqHeader = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+        });
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'Account/RemoveLogin', body1, { headers: reqHeader })
+                .subscribe(data => {
+                    observer.next(data);
+                },
+                    err => {
+                        observer.next(err);
+                    });
+        });
+    }
+
+    setPassword(NewPassword, ConfirmPassword, email, token) {
+        const body1 = JSON.stringify({
+            "NewPassword": NewPassword,
+            "ConfirmPassword": ConfirmPassword,
+            "Email": email,
+            "Code": token
+        })
+        let headers = new HttpHeaders();
+        headers = headers.set('content-Type', 'application/json;charset=utf-8');
+        return Observable.create((observer) => {
+            return this.http.post(this.url + 'Account/SetPassword', body1, { headers: headers })
                 .subscribe(data => {
                     observer.next(data);
                 },

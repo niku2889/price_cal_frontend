@@ -1,9 +1,10 @@
 <p-toast position="top-right"></p-toast>
+
 <div class="card-body">
     <div *ngIf="isFirstEntry" class="text-center">
-        <button (click)="firstEntry('existing')" class="btn  btn-info ">Use Existing Report</button>
-        <hr style="border-top: 1px solid;">
-        <button (click)="firstEntry('new')" class="btn   btn-info ">Generate New Report</button>
+        <button (click)="firstEntry('existing')" class="btn  btn-info ">Retrieve Previous Report/Version</button>
+        <div class="hr-sect">OR</div>
+        <button (click)="firstEntry('new')" class="btn   btn-info ">Generate a New Report</button>
     </div>
 
     <form *ngIf="isNew" [formGroup]="form" (ngSubmit)="submit()">
@@ -71,9 +72,11 @@
             </select>
         </div>
         <div class="form-group text-center">
-            <a style="cursor: pointer;" (click)="goBack()" class="float-left pointer"><i class="fa fa-arrow-left"></i>
+            <a *ngIf="!isBack" style="cursor: pointer;" (click)="goBack()" class="float-left pointer"><i
+                    class="fa fa-arrow-left"></i>
                 Back</a>
             <input type="submit" value="Submit" [disabled]="form.invalid" class="btn btn-info btn-sm">
+            <button *ngIf="isBack" class="btn btn-danger btn-default btn-sm ml-4 ng-star-inserted"  (click)="onNoClick()">Close</button>
         </div>
     </form>
 

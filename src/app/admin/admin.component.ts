@@ -109,6 +109,11 @@ export class AdminComponent implements OnInit, AfterViewInit {
       route: 'admin/reports',
     },
     {
+      displayName: 'Reset Password',
+      iconName: 'security',
+      route: 'admin/reset-password',
+    },
+    {
       displayName: 'Logs',
       iconName: 'history',
       route: 'admin/logs',

@@ -9,6 +9,7 @@ import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
 const EXCEL_EXTENSION = '.xlsx';
+import { NgxSpinnerService } from "ngx-spinner"; 
 
 export interface DialogData {
   email: string;
@@ -19,13 +20,15 @@ export interface DialogData {
   currencyData: [];
   reportId: string;
   userId: number;
+  isNew: boolean;
+  isBack: boolean;
 }
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
-  providers: [MessageService, HomeService],
+  providers: [MessageService, HomeService,NgxSpinnerService],
 })
 
 export class HomeComponent implements OnInit {
@@ -190,6 +193,7 @@ export class HomeComponent implements OnInit {
   constructor(private messageService: MessageService,
     public dialog: MatDialog,
     private service: HomeService,
+    private SpinnerService: NgxSpinnerService
   ) {
     this.service.getAllComplieanceFee()
       .subscribe(data => {
@@ -198,6 +202,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.SpinnerService.show(); 
     this.getAllCC();
     this.getAllErp();
     this.getAllEdi();
@@ -230,6 +235,7 @@ export class HomeComponent implements OnInit {
     this.service.getAllErp()
       .subscribe(data => {
         this.erpData = data;
+         this.SpinnerService.hide();  
         this.addPrimaryIntegrationService();
       });
   }
@@ -273,7 +279,7 @@ export class HomeComponent implements OnInit {
     this.service.getAllCC()
       .subscribe(data => {
         this.currencyData = data;
-        this.openDialog();
+        this.openDialog(false, false);
       });
   }
 
@@ -378,10 +384,10 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  openDialog(): void {
+  openDialog(isNew, isBack): void {
     const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
       width: '500px',
-      data: { name: this.name, email: this.email, dealId: this.dealId, customerName: this.customerName, currency: this.currency, currencyData: this.currencyData, reportId: this.reportId, userId: this.userId },
+      data: { name: this.name, email: this.email, dealId: this.dealId, customerName: this.customerName, currency: this.currency, currencyData: this.currencyData, reportId: this.reportId, userId: this.userId, isNew: isNew, isBack: isBack },
       disableClose: true
     });
 
@@ -567,34 +573,36 @@ export class HomeComponent implements OnInit {
                       }
                       this.service.getEcommerceDetails(this.inputData[0].Id)
                         .subscribe(data3 => {
+                          console.log(data3)
                           if (data3.length > 0) {
                             let m = data3.filter(a => a.Name == 'Magento');
-                            this.ecommerceData[0].orders = m[0].Orders;
-                            this.ecommerceData[0].product = m[0].Product;
-                            this.ecommerceData[0].fullfilment = m[0].Fullfilment;
-                            this.ecommerceData[0].payment = m[0].Inventory;
-                            this.ecommerceData[0].inventory = m[0].Payment;
+                            console.log(m)
+                            this.ecommerceData[0].orders = m.length > 0 ? m[0].Orders : false;
+                            this.ecommerceData[0].product = m.length > 0 ? m[0].Product : false;
+                            this.ecommerceData[0].fullfilment = m.length > 0 ? m[0].Fullfilment : false;
+                            this.ecommerceData[0].payment = m.length > 0 ? m[0].Inventory : false;
+                            this.ecommerceData[0].inventory = m.length > 0 ? m[0].Payment : false;
 
                             let s = data3.filter(a => a.Name == 'Shopify');
-                            this.ecommerceData[1].orders = s[0].Orders;
-                            this.ecommerceData[1].product = s[0].Product;
-                            this.ecommerceData[1].fullfilment = s[0].Fullfilment;
-                            this.ecommerceData[1].payment = s[0].Inventory;
-                            this.ecommerceData[1].inventory = s[0].Payment;
+                            this.ecommerceData[1].orders = s.length > 0 ? s[0].Orders : false;
+                            this.ecommerceData[1].product = s.length > 0 ? s[0].Product : false;
+                            this.ecommerceData[1].fullfilment = s.length > 0 ? s[0].Fullfilment : false;
+                            this.ecommerceData[1].payment = s.length > 0 ? s[0].Inventory : false;
+                            this.ecommerceData[1].inventory = s.length > 0 ? s[0].Payment : false;
 
                             let w = data3.filter(a => a.Name == 'Woo Commerce');
-                            this.ecommerceData[2].orders = w[0].Orders;
-                            this.ecommerceData[2].product = w[0].Product;
-                            this.ecommerceData[2].fullfilment = w[0].Fullfilment;
-                            this.ecommerceData[2].payment = w[0].Inventory;
-                            this.ecommerceData[2].inventory = w[0].Payment;
+                            this.ecommerceData[2].orders = w.length > 0 ? w[0].Orders : false;
+                            this.ecommerceData[2].product = w.length > 0 ? w[0].Product : false;
+                            this.ecommerceData[2].fullfilment = w.length > 0 ? w[0].Fullfilment : false;
+                            this.ecommerceData[2].payment = w.length > 0 ? w[0].Inventory : false;
+                            this.ecommerceData[2].inventory = w.length > 0 ? w[0].Payment : false;
 
                             let a = data3.filter(a => a.Name == 'Amazon Seller Central');
-                            this.ecommerceData[3].orders = a[0].Orders;
-                            this.ecommerceData[3].product = a[0].Product;
-                            this.ecommerceData[3].fullfilment = a[0].Fullfilment;
-                            this.ecommerceData[3].payment = a[0].Inventory;
-                            this.ecommerceData[3].inventory = a[0].Payment;
+                            this.ecommerceData[3].orders = a.length > 0 ? a[0].Orders : false;
+                            this.ecommerceData[3].product = a.length > 0 ? a[0].Product : false;
+                            this.ecommerceData[3].fullfilment = a.length > 0 ? a[0].Fullfilment : false;
+                            this.ecommerceData[3].payment = a.length > 0 ? a[0].Inventory : false;
+                            this.ecommerceData[3].inventory = a.length > 0 ? a[0].Payment : false;
 
                             this.ecommerceData.forEach(e => {
                               if (e.orders)
@@ -613,7 +621,7 @@ export class HomeComponent implements OnInit {
                     });
                 });
 
-              this.service.getUsersFeeDetails(this.inputData[0].Id)
+              this.service.getUsersFeeDetails(this.userId)
                 .subscribe(data4 => {
                   if (data4.length > 0) {
                     this.updateOneTimeFeeSection(data4.filter(a => a.FeeType == 'OneTime' && a.Section == 'communicationServices'), 'communicationServices');
@@ -664,7 +672,7 @@ export class HomeComponent implements OnInit {
   }
 
   editPopup() {
-    this.openDialog();
+    this.openDialog(true, true);
   }
 
   getFee(index) {
@@ -820,10 +828,12 @@ export class HomeComponent implements OnInit {
     } else if (this.noTPusingPortal > 2000) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'No. of trading partners using the Portal cannot be more than 2000, Contact your manager for special pricing' });
       return false;
-    } else if (this.noEdiDocs == 0 || this.noEdiDocs == null) {
-      this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Number of Documents on Scope is require' });
-      return false;
-    } else if (this.noTPInScope < this.maxEDITpNo) {
+    }
+    // else if (this.noEdiDocs == 0 || this.noEdiDocs == null) {
+    //   this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Number of Documents on Scope is require' });
+    //   return false;
+    // } 
+    else if (this.noTPInScope < this.maxEDITpNo) {
       this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Enter a number equal or higher than the max of the tps per doc' });
       return false;
     } else if ((this.selectedKBPlan == "" || !this.selectedKBPlan) && this.selectedKBPlan != "No Plan") {
@@ -1189,6 +1199,7 @@ export class HomeComponent implements OnInit {
   changeErp(e) {
     this.addPrimaryIntegrationService();
     this.addSecondaryIntegrationServices(this.noEdiDocs);
+    this.addTpAndDocument();
     if (!this.tpUsingOnlyEdiStandards)
       this.addOneTimeFeeOthersService();
   }
@@ -1220,6 +1231,8 @@ export class HomeComponent implements OnInit {
       this.addSecondaryIntegrationServices(0);
       this.addTPAndDocumentService("TP and Documents", '', '', 0, 0);
       this.projectManagement(0, 0);
+      this.noTPInScope = 0;
+      this.maxEDITpNo = 0;  
     }
     //this.isNonEDI = false;
   }
@@ -1784,7 +1797,7 @@ export class HomeComponent implements OnInit {
   addPrimaryIntegrationService() {
     let tp = 0;
     this.ediLoop.forEach(e => {
-      if (e.integratedERPDiPulse == "Outbound from Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
+      if (e.integratedERPDiPulse == "Outbound to Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
         tp += 1;
       }
     });
@@ -1954,7 +1967,7 @@ export class HomeComponent implements OnInit {
     let transactionType = 0;
     let tp = this.noTPInScope;
     this.ediLoop.forEach(e => {
-      if (e.integratedERPDiPulse == "Outbound from Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
+      if (e.integratedERPDiPulse == "Outbound to Trading Partner" || e.integratedERPDiPulse == "Inbound from Trading Partner") {
         transactionType += 1;
         //tp += e.noOfTP; 
       }
@@ -2831,6 +2844,7 @@ export class HomeComponent implements OnInit {
 @Component({
   selector: 'user-dialog',
   templateUrl: 'userDialog.html',
+  styleUrls: ['./home.component.css'],
   providers: [MessageService, HomeService],
 })
 export class DialogOverviewExampleDialog {
@@ -2850,7 +2864,8 @@ export class DialogOverviewExampleDialog {
   });
   isFirstEntry = true;
   isExisting = false;
-  isNew = false;
+  isNew: boolean;
+  isBack: boolean;
 
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
@@ -2860,6 +2875,10 @@ export class DialogOverviewExampleDialog {
     this.form.controls['dealId'].setValue(this.data.dealId);
     this.form.controls['customerName'].setValue(this.data.customerName);
     this.form.controls['currency'].setValue(this.data.currency);
+    this.isNew = this.data.isNew;
+    this.isBack = this.data.isBack;
+    if (this.isNew)
+      this.isFirstEntry = false;
   }
 
   onNoClick(): void {

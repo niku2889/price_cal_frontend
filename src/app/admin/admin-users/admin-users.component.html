@@ -5,8 +5,7 @@
             <h5>ADMIN USERS</h5>
         </div>
         <div class="card-body">
-            <p-table #dt [columns]="cols" [value]="planData" selectionMode="single" [(selection)]="selectedPlan"
-                (onRowSelect)="onRowSelect($event)" [paginator]="true" [rows]="15">
+            <p-table #dt [columns]="cols" [value]="planData" [paginator]="true" [rows]="15">
                 <ng-template pTemplate="caption">
                     <div style="text-align: right">
                         <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
@@ -20,6 +19,7 @@
                             {{col.header}}
                             <p-sortIcon [field]="col.field"></p-sortIcon>
                         </th>
+                        <th>Action</th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-rowData let-columns="columns">
@@ -27,6 +27,9 @@
                         <td *ngFor="let col of columns">
                             {{rowData[col.field]}}
                         </td>
+                        <td><button type="button" *ngIf="getValid(rowData.Email)" class="btn btn-sm btn-danger" (click)="deleteUser(rowData.Id)"><i
+                            class="fa fa-trash-o"></i>
+                        Delete</button></td>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="summary" let-rowData>
@@ -39,14 +42,14 @@
             </p-table>
         </div>
     </div>
-    <p-dialog header="Plan Details" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
+    <p-dialog header="Register New User" [(visible)]="displayDialog" [focusOnShow]="false" [responsive]="true"
         showEffect="fade" [modal]="true" [style]="{width: '600px'}" [autoZIndex]="false">
         <div class="ui-g ui-fluid" *ngIf="plan">
             <div class="ui-g-12 p-0">
-                <div class="ui-g-6">
+                <!-- <div class="ui-g-6">
                     <label class="font-weight-bold">Name</label>
                     <input class="form-control" [(ngModel)]="plan.Name" autofocus />
-                </div>
+                </div> -->
                 <div class="ui-g-6">
                     <label class="font-weight-bold">Email</label>
                     <input class="form-control" [(ngModel)]="plan.Email" autofocus />
@@ -63,8 +66,8 @@
         </div>
         <p-footer>
             <div class="ui-dialog-buttonpane ui-helper-clearfix">
-                <button type="button" class="btn btn-sm btn-danger" (click)="delete()"><i
-                        class="fa fa-close"></i>Delete</button>
+                <!-- <button type="button" class="btn btn-sm btn-danger" (click)="delete()"><i
+                        class="fa fa-close"></i>Delete</button> -->
                 <button type="button" class="btn btn-sm btn-primary" (click)="save()"><i
                         class="fa fa-check"></i>Save</button>
             </div>

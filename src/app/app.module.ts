@@ -16,6 +16,7 @@ import { HeaderComponent } from './admin/header/header.component';
 import { AdminHomeComponent } from './admin/admin-home/admin-home.component';
 import { AdminLoginComponent } from './admin/admin-login/admin-login.component';
 import { MenuListItemComponent } from './admin/menu-list-item/menu-list-item.component';
+import { NgxSpinnerModule } from "ngx-spinner";  
 import {
   MatAutocompleteModule,
   MatButtonModule,
@@ -68,7 +69,10 @@ import { LogsComponent } from './admin/logs/logs.component';
 import { TooltipModule } from 'primeng/tooltip';
 import { DiscountComponent } from './admin/tables/discount/discount.component';
 import { DiametricsFee3Component } from './admin/tables/diametrics-fee3/diametrics-fee3.component';
-import { RoundPipe } from './home/roundPipe'
+import { RoundPipe } from './home/roundPipe';
+import { ResetPasswordComponent } from './admin/reset-password/reset-password.component';
+import { ForgotPasswordComponent } from './admin/forgot-password/forgot-password.component';
+import { ManagePasswordComponent } from './admin/manage-password/manage-password.component';
 
 @NgModule({
   declarations: [
@@ -99,10 +103,14 @@ import { RoundPipe } from './home/roundPipe'
     LogsComponent,
     DiscountComponent,
     DiametricsFee3Component,
-    RoundPipe
+    RoundPipe,
+    ResetPasswordComponent,
+    ForgotPasswordComponent,
+    ManagePasswordComponent
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     AppRoutingModule,
     TableModule,
     DialogModule,
@@ -110,11 +118,10 @@ import { RoundPipe } from './home/roundPipe'
     ReactiveFormsModule,
     TabViewModule,
     NgbModule,
-    HttpClientModule,
     BrowserAnimationsModule,
     DropdownModule,
     ToastModule,
-
+    NgxSpinnerModule,
     // Material
     MatAutocompleteModule,
     MatButtonModule,
@@ -144,6 +151,7 @@ import { RoundPipe } from './home/roundPipe'
     MatTooltipModule,
     MatNativeDateModule,
     TooltipModule,
+   
   ],
   providers: [NavService],
   entryComponents: [DialogOverviewExampleDialog],
